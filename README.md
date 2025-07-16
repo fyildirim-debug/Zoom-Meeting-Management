@@ -45,7 +45,7 @@ Modern, güvenli ve kullanıcı dostu Zoom toplantı yönetim sistemi. Kurumsal 
 #### Kurulum Adımları
 1. **Dosyaları İndirin**
    ```bash
-   git clone https://github.com/kullanici/zoom-meeting-management.git
+   git clone https://github.com/fyildirim-debug/zoom-meeting-management.git
    cd zoom-meeting-management
    ```
 
@@ -175,7 +175,7 @@ A modern, secure, and user-friendly Zoom meeting management system. A full-featu
 #### Installation Steps
 1. **Download Files**
    ```bash
-   git clone https://github.com/username/zoom-meeting-management.git
+   git clone https://github.com/fyildirim-debug/zoom-meeting-management.git
    cd zoom-meeting-management
    ```
 
@@ -261,48 +261,6 @@ A modern, secure, and user-friendly Zoom meeting management system. A full-featu
 - 1 GB RAM
 - 500 MB disk space
 - SSL certificate
-
----
-
-## 🌟 Highlighted Features / Öne Çıkan Özellikler
-
-### 🔒 Security First / Güvenlik Öncelikli
-- Modern encryption algorithms / Modern şifreleme algoritmaları
-- SQL injection protection / SQL injection koruması
-- XSS attack protection / XSS attack koruması
-- CSRF token system / CSRF token sistemi
-
-### ⚡ Performance / Performans
-- Optimized database queries / Optimize edilmiş veritabanı sorguları
-- Caching mechanisms / Caching mekanizmaları
-- Lazy loading / Lazy loading
-- Minified assets / Minified assets
-
-### 🎨 Modern UI/UX
-- Responsive design / Responsive tasarım
-- Glass morphism effects / Glass morphism efektleri
-- Smooth animations / Smooth animations
-- Accessibility support / Accessibility support
-
-## 📄 License / Lisans
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
-## 🆘 Support / Destek
-
-- **Issues**: Use GitHub Issues / GitHub Issues kullanın
-- **Documentation**: Check Wiki pages / Wiki sayfalarını inceleyin
-- **Community**: Join Discussions / Discussions bölümüne katılın
-
-## 🎯 Roadmap
-
-- [ ] **Mobile App**: React Native mobile application / React Native mobil uygulama
-- [ ] **Calendar Integration**: Google Calendar integration / Google Calendar entegrasyonu
-- [ ] **Advanced Analytics**: Detailed analytics dashboard / Detaylı analitik dashboard
-- [ ] **Multi-language**: Multi-language support / Çoklu dil desteği
-- [ ] **SSO Integration**: Single Sign-On support / Single Sign-On desteği
 
 ---
 
