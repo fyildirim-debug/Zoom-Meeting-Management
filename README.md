@@ -246,6 +246,14 @@ Zoom Meeting Management System is a comprehensive meeting management platform de
 
 This project is licensed under the MIT License.
 
+### Kullanım Şartları / Usage Terms
+
+**Türkçe:**
+📖 **Açık Kaynak** | Kodları ücretsiz projelerinizde kullanabilirsiniz. Eğer kod parçacıkları ücretli projelerde kullanılırsa lisansa tabidir.
+
+**English:**
+📖 **Open Source** | You can use the codes in your free projects. If code snippets are used in paid projects, they are subject to licensing.
+
 ## Developer
 
 **Furkan Yıldırım**
