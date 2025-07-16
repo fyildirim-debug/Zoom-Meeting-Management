@@ -8,6 +8,8 @@
 
 Zoom Meeting Management System, kurumsal ortamlar için geliştirilmiş kapsamlı bir toplantı yönetim platformudur. Sistem, Zoom API entegrasyonu aracılığıyla toplantı süreçlerini otomatikleştirerek kurumlara verimli bir toplantı yönetim çözümü sunar.
 
+![Zoom Meeting Management System](githubimg/zoomsystem.png)
+
 ## Sistem Özellikleri
 
 ### Güvenlik
