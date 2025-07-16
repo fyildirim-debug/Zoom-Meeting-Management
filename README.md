@@ -246,6 +246,11 @@ Zoom Meeting Management System is a comprehensive meeting management platform de
 
 This project is licensed under the MIT License.
 
+## Developer
+
+**Furkan Yıldırım**
+[furkanyildirim.com](https://furkanyildirim.com)
+
 ## Support
 
 For support and questions, please use the GitHub Issues section.
