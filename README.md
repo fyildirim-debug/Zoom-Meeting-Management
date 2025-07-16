@@ -1,267 +1,251 @@
-# 🎯 Zoom Meeting Management System
+# Zoom Meeting Management System
 
-**🇹🇷 Türkçe** | **🇺🇸 English**
+**Türkçe** | **English**
 
 ---
 
-## 🇹🇷 Türkçe
+## Türkçe
 
-Modern, güvenli ve kullanıcı dostu Zoom toplantı yönetim sistemi. Kurumsal kullanım için tasarlanmış, tam özellikli web uygulaması.
+Zoom Meeting Management System, kurumsal ortamlar için geliştirilmiş kapsamlı bir toplantı yönetim platformudur. Sistem, Zoom API entegrasyonu aracılığıyla toplantı süreçlerini otomatikleştirerek kurumlara verimli bir toplantı yönetim çözümü sunar.
 
-### ✨ Özellikler
+## Sistem Özellikleri
 
-#### 🔐 Güvenlik
-- **Güvenli Authentication**: Session tabanlı güvenli giriş sistemi
-- **CSRF Protection**: Tüm formlarda CSRF token koruması
-- **Role Based Access**: Admin ve kullanıcı yetki seviyeleri
-- **Secure Install**: Gelişmiş veritabanı doğrulama sistemi
+### Güvenlik
+- Session tabanlı kimlik doğrulama sistemi
+- CSRF token koruması
+- Rol tabanlı erişim kontrolü
+- Gelişmiş veritabanı doğrulama mekanizmaları
 
-#### 🎪 Toplantı Yönetimi
-- **Otomatik Zoom Entegrasyonu**: Zoom API ile tam entegrasyon
-- **Akıllı Onay Sistemi**: Admin onaylı toplantı oluşturma
-- **Çakışma Kontrolü**: Otomatik toplantı çakışma tespiti
-- **Birim Bazlı Yetkilendirme**: Departman bazlı erişim kontrolü
+### Toplantı Yönetimi
+- Zoom API ile tam entegrasyon
+- Yönetici onay mekanizması
+- Otomatik çakışma tespiti
+- Departman bazlı yetkilendirme sistemi
 
-#### 📊 Admin Paneli
-- **Kapsamlı Dashboard**: Gerçek zamanlı istatistikler
-- **Kullanıcı Yönetimi**: Kullanıcı ve departman yönetimi
-- **Zoom Hesap Yönetimi**: Çoklu Zoom hesabı desteği
-- **Detaylı Raporlama**: Toplantı ve kullanım raporları
+### Yönetim Paneli
+- Gerçek zamanlı sistem istatistikleri
+- Kullanıcı ve departman yönetim araçları
+- Çoklu Zoom hesabı desteği
+- Kapsamlı raporlama sistemleri
 
-#### 🎨 Modern Tasarım
-- **Responsive Design**: Tüm cihazlarda mükemmel görünüm
-- **Glass Morphism**: Modern tasarım dili
-- **Dark/Light Theme**: Tema desteği
-- **Smooth Animations**: Akıcı animasyonlar
+### Kullanıcı Arayüzü
+- Responsive web tasarımı
+- Modern kullanıcı deneyimi
+- Çoklu tema desteği
+- Erişilebilirlik standartlarına uyumluluk
 
-### 🚀 Kurulum
+## Teknik Gereksinimler
 
-#### Gereksinimler
-- PHP 8.0+
+### Minimum Sistem Gereksinimleri
+- PHP 8.0 veya üzeri
 - MySQL 5.7+ / SQLite 3.0+
-- Apache/Nginx
-- Zoom API Hesabı
+- Apache/Nginx web sunucusu
+- Zoom API hesabı
 
-#### Kurulum Adımları
-1. **Dosyaları İndirin**
-   ```bash
-   git clone https://github.com/fyildirim-debug/zoom-meeting-management.git
-   cd zoom-meeting-management
-   ```
-
-2. **Web Sunucuya Yükleyin**
-   Dosyaları web sunucunuzun root klasörüne yükleyin.
-
-3. **Kurulum Sihirbazını Çalıştırın**
-   ```
-   http://yourdomain.com/install/
-   ```
-
-4. **Kurulum Adımları**
-   - **Hoş Geldiniz**: Sistem gereksinimleri kontrol edilir
-   - **Veritabanı**: MySQL/SQLite yapılandırması
-   - **Admin Hesabı**: Yönetici hesabı oluşturulur
-   - **Sistem Ayarları**: Site ayarları ve zaman dilimi
-   - **Tamamlama**: Otomatik kurulum tamamlanır
-
-### 🛠️ Zoom API Yapılandırması
-
-1. **Zoom App Oluşturun**
-   - [Zoom Marketplace](https://marketplace.zoom.us/) hesabı açın
-   - **Server-to-Server OAuth** app oluşturun
-   - Gerekli scope'ları seçin
-
-2. **Admin Panelinde Yapılandırın**
-   - **Admin Panel → Zoom Hesapları**
-   - **Yeni Hesap Ekle**
-   - Client ID, Client Secret, Account ID bilgilerini girin
-
-### 📱 Kullanım
-
-#### Kullanıcı İşlemleri
-- **Toplantı Talebi**: Yeni toplantı oluşturma
-- **Toplantılarım**: Kendi toplantılarını görüntüleme
-- **Profil Yönetimi**: Kişisel bilgi düzenleme
-
-#### Admin İşlemleri
-- **Toplantı Onayları**: Bekleyen toplantıları onaylama/reddetme
-- **Kullanıcı Yönetimi**: Kullanıcı ve departman yönetimi
-- **Sistem Ayarları**: Genel sistem yapılandırması
-- **Raporlama**: Detaylı kullanım raporları
-
-### 🔧 Geliştirme
-
-#### Teknoloji Stack
-- **Backend**: PHP 8.0+, PDO
-- **Frontend**: Vanilla JavaScript, Tailwind CSS
-- **Database**: MySQL/SQLite
-- **API**: Zoom REST API v2
-
-#### Klasör Yapısı
-```
-├── admin/           # Admin paneli
-├── api/             # API endpoint'leri
-├── config/          # Yapılandırma dosyaları
-├── includes/        # Ortak PHP dosyaları
-├── install/         # Kurulum sistemi
-├── logs/            # Log dosyaları
-├── assets/          # CSS, JS, görsel dosyalar
-└── *.php            # Ana sayfa dosyaları
-```
-
-### 🤝 Katkıda Bulunma
-
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit yapın (`git commit -m 'Add amazing feature'`)
-4. Push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
-
-### 📊 Sistem Gereksinimleri
-
-#### Minimum
-- PHP 8.0+
-- MySQL 5.7+ / SQLite 3.0+
-- 512 MB RAM
-- 100 MB disk alanı
-
-#### Önerilen
+### Önerilen Sistem Gereksinimleri
 - PHP 8.2+
 - MySQL 8.0+
 - 1 GB RAM
-- 500 MB disk alanı
 - SSL sertifikası
 
----
+## Kurulum
 
-## 🇺🇸 English
+### Kurulum Adımları
 
-A modern, secure, and user-friendly Zoom meeting management system. A full-featured web application designed for corporate use.
-
-### ✨ Features
-
-#### 🔐 Security
-- **Secure Authentication**: Session-based secure login system
-- **CSRF Protection**: CSRF token protection on all forms
-- **Role Based Access**: Admin and user authorization levels
-- **Secure Install**: Advanced database validation system
-
-#### 🎪 Meeting Management
-- **Automatic Zoom Integration**: Full integration with Zoom API
-- **Smart Approval System**: Admin-approved meeting creation
-- **Conflict Detection**: Automatic meeting conflict detection
-- **Department-based Authorization**: Department-based access control
-
-#### 📊 Admin Panel
-- **Comprehensive Dashboard**: Real-time statistics
-- **User Management**: User and department management
-- **Zoom Account Management**: Multiple Zoom account support
-- **Detailed Reporting**: Meeting and usage reports
-
-#### 🎨 Modern Design
-- **Responsive Design**: Perfect appearance on all devices
-- **Glass Morphism**: Modern design language
-- **Dark/Light Theme**: Theme support
-- **Smooth Animations**: Fluid animations
-
-### 🚀 Installation
-
-#### Requirements
-- PHP 8.0+
-- MySQL 5.7+ / SQLite 3.0+
-- Apache/Nginx
-- Zoom API Account
-
-#### Installation Steps
-1. **Download Files**
+1. **Kaynak Kod İndirme**
    ```bash
    git clone https://github.com/fyildirim-debug/zoom-meeting-management.git
    cd zoom-meeting-management
    ```
 
-2. **Upload to Web Server**
-   Upload files to your web server's root directory.
+2. **Dosya Yükleme**
+   Proje dosyalarını web sunucunuzun root dizinine yükleyin.
 
-3. **Run Installation Wizard**
-   ```
-   http://yourdomain.com/install/
-   ```
+3. **Kurulum Sihirbazı**
+   Tarayıcınızda `http://yourdomain.com/install/` adresine giderek kurulum işlemini başlatın.
 
-4. **Installation Steps**
-   - **Welcome**: System requirements check
-   - **Database**: MySQL/SQLite configuration
-   - **Admin Account**: Administrator account creation
-   - **System Settings**: Site settings and timezone
-   - **Completion**: Automatic installation completion
+4. **Kurulum Süreci**
+   - Sistem gereksinimleri kontrolü
+   - Veritabanı yapılandırması
+   - Yönetici hesabı oluşturma
+   - Sistem ayarları yapılandırması
 
-### 🛠️ Zoom API Configuration
+## Zoom API Yapılandırması
 
-1. **Create Zoom App**
-   - Open [Zoom Marketplace](https://marketplace.zoom.us/) account
-   - Create **Server-to-Server OAuth** app
-   - Select required scopes
+### API Hesabı Oluşturma
+1. [Zoom Marketplace](https://marketplace.zoom.us/) üzerinden hesap oluşturun
+2. Server-to-Server OAuth uygulaması geliştirin
+3. Gerekli yetkilendirme kapsamlarını tanımlayın
 
-2. **Configure in Admin Panel**
-   - **Admin Panel → Zoom Accounts**
-   - **Add New Account**
-   - Enter Client ID, Client Secret, Account ID information
+### Sistem Yapılandırması
+1. Admin panelinden Zoom hesap yönetimi sayfasına erişin
+2. Yeni hesap ekle seçeneğini kullanın
+3. Client ID, Client Secret ve Account ID bilgilerini girin
 
-### 📱 Usage
+## Sistem Kullanımı
 
-#### User Operations
-- **Meeting Request**: Create new meeting
-- **My Meetings**: View own meetings
-- **Profile Management**: Edit personal information
+### Kullanıcı Fonksiyonları
+- Toplantı talep sistemi
+- Kişisel toplantı yönetimi
+- Profil bilgilerini güncelleme
 
-#### Admin Operations
-- **Meeting Approvals**: Approve/reject pending meetings
-- **User Management**: User and department management
-- **System Settings**: General system configuration
-- **Reporting**: Detailed usage reports
+### Yönetici Fonksiyonları
+- Toplantı onay süreçleri
+- Kullanıcı yetkilendirme
+- Sistem yapılandırması
+- Raporlama ve analiz
 
-### 🔧 Development
+## Geliştirme Bilgileri
 
-#### Technology Stack
+### Teknoloji Altyapısı
 - **Backend**: PHP 8.0+, PDO
-- **Frontend**: Vanilla JavaScript, Tailwind CSS
-- **Database**: MySQL/SQLite
+- **Frontend**: JavaScript, Tailwind CSS
+- **Veritabanı**: MySQL/SQLite
 - **API**: Zoom REST API v2
 
-#### Folder Structure
+### Proje Yapısı
 ```
-├── admin/           # Admin panel
-├── api/             # API endpoints
-├── config/          # Configuration files
-├── includes/        # Common PHP files
-├── install/         # Installation system
-├── logs/            # Log files
-├── assets/          # CSS, JS, image files
-└── *.php            # Main page files
+├── admin/           # Yönetim paneli
+├── api/             # API uç noktaları
+├── config/          # Yapılandırma dosyaları
+├── includes/        # Ortak PHP bileşenleri
+├── install/         # Kurulum sistemi
+├── logs/            # Günlük dosyaları
+└── *.php            # Ana uygulama dosyaları
 ```
 
-### 🤝 Contributing
+## Katkıda Bulunma
 
-1. Fork it
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Create Pull Request
-
-### 📊 System Requirements
-
-#### Minimum
-- PHP 8.0+
-- MySQL 5.7+ / SQLite 3.0+
-- 512 MB RAM
-- 100 MB disk space
-
-#### Recommended
-- PHP 8.2+
-- MySQL 8.0+
-- 1 GB RAM
-- 500 MB disk space
-- SSL certificate
+1. Projeyi fork edin
+2. Özellik dalı oluşturun (`git checkout -b feature/yeni-ozellik`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik eklendi'`)
+4. Dalınızı push edin (`git push origin feature/yeni-ozellik`)
+5. Pull Request oluşturun
 
 ---
 
-❤️ **Made with love for the community / Topluluk için sevgiyle yapıldı**
+## English
+
+Zoom Meeting Management System is a comprehensive meeting management platform developed for corporate environments. The system provides efficient meeting management solutions through Zoom API integration, automating meeting processes for organizations.
+
+## System Features
+
+### Security
+- Session-based authentication system
+- CSRF token protection
+- Role-based access control
+- Advanced database validation mechanisms
+
+### Meeting Management
+- Full integration with Zoom API
+- Administrative approval mechanism
+- Automatic conflict detection
+- Department-based authorization system
+
+### Management Panel
+- Real-time system statistics
+- User and department management tools
+- Multiple Zoom account support
+- Comprehensive reporting systems
+
+### User Interface
+- Responsive web design
+- Modern user experience
+- Multi-theme support
+- Accessibility standards compliance
+
+## Technical Requirements
+
+### Minimum System Requirements
+- PHP 8.0 or higher
+- MySQL 5.7+ / SQLite 3.0+
+- Apache/Nginx web server
+- Zoom API account
+
+### Recommended System Requirements
+- PHP 8.2+
+- MySQL 8.0+
+- 1 GB RAM
+- SSL certificate
+
+## Installation
+
+### Installation Steps
+
+1. **Source Code Download**
+   ```bash
+   git clone https://github.com/fyildirim-debug/zoom-meeting-management.git
+   cd zoom-meeting-management
+   ```
+
+2. **File Upload**
+   Upload project files to your web server's root directory.
+
+3. **Installation Wizard**
+   Navigate to `http://yourdomain.com/install/` in your browser to start the installation process.
+
+4. **Installation Process**
+   - System requirements check
+   - Database configuration
+   - Administrator account creation
+   - System settings configuration
+
+## Zoom API Configuration
+
+### API Account Creation
+1. Create an account on [Zoom Marketplace](https://marketplace.zoom.us/)
+2. Develop a Server-to-Server OAuth application
+3. Define required authorization scopes
+
+### System Configuration
+1. Access Zoom account management page from admin panel
+2. Use add new account option
+3. Enter Client ID, Client Secret, and Account ID information
+
+## System Usage
+
+### User Functions
+- Meeting request system
+- Personal meeting management
+- Profile information updates
+
+### Administrator Functions
+- Meeting approval processes
+- User authorization
+- System configuration
+- Reporting and analysis
+
+## Development Information
+
+### Technology Infrastructure
+- **Backend**: PHP 8.0+, PDO
+- **Frontend**: JavaScript, Tailwind CSS
+- **Database**: MySQL/SQLite
+- **API**: Zoom REST API v2
+
+### Project Structure
+```
+├── admin/           # Management panel
+├── api/             # API endpoints
+├── config/          # Configuration files
+├── includes/        # Common PHP components
+├── install/         # Installation system
+├── logs/            # Log files
+└── *.php            # Main application files
+```
+
+## Contributing
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions, please use the GitHub Issues section.
