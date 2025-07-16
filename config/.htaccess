@@ -1,0 +1,15 @@
+# Config Klasörü - PHP Dosyalarına Doğrudan Erişim Engeli
+# Bu dosyalar sadece PHP include/require ile kullanılmalı
+
+# PHP dosyalarına doğrudan erişimi engelle
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+# Konfigürasyon dosyalarına erişimi engelle
+<FilesMatch "\.(ini|conf|config|env)$">
+    Require all denied
+</FilesMatch>
+
+# Dizin listelemeyi kapat
+Options -Indexes 

@@ -1,0 +1,15 @@
+# Includes Klasörü - PHP Include Dosyalarına Doğrudan Erişim Engeli
+# Bu dosyalar sadece PHP include/require ile kullanılmalı
+
+# PHP dosyalarına doğrudan erişimi engelle
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+# Template ve include dosyalarına erişimi engelle
+<FilesMatch "\.(inc|tpl|template)$">
+    Require all denied
+</FilesMatch>
+
+# Dizin listelemeyi kapat
+Options -Indexes 

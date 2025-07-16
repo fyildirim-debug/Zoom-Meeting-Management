@@ -1,0 +1,8 @@
+# Logs Klasörü - Tam Erişim Engeli
+# Bu klasördeki hiçbir dosyaya web'den erişim olmamalı
+
+# Tüm dosyalara erişimi engelle (Apache 2.4 uyumlu)
+Require all denied
+
+# Dizin listelemeyi kapat
+Options -Indexes 

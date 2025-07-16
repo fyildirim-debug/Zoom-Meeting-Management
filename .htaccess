@@ -1,0 +1,72 @@
+# Zoom Toplantı Yönetim Sistemi - Güvenlik Ayarları (XAMPP Uyumlu)
+# Bu dosya sistemi web tabanlı saldırılardan korur
+
+# .env dosyasına erişimi tamamen engelle
+<Files ".env">
+    Require all denied
+</Files>
+
+# Tüm .env* dosyalarına erişimi engelle (.env.local, .env.prod, vb.)
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+# Konfigürasyon dosyalarını koru
+<FilesMatch "\.(env|ini|conf|config)$">
+    Require all denied
+</FilesMatch>
+
+# Yedek dosyalarına erişimi engelle
+<FilesMatch "\.(bak|backup|old|tmp|temp|~)$">
+    Require all denied
+</FilesMatch>
+
+# Git dosyalarına erişimi engelle
+<FilesMatch "^\.git">
+    Require all denied
+</FilesMatch>
+
+# Composer dosyalarını koru
+<Files "composer.json">
+    Require all denied
+</Files>
+<Files "composer.lock">
+    Require all denied
+</Files>
+
+# README ve dokümantasyon dosyalarını koru
+<FilesMatch "\.(md|txt|log)$">
+    Require all denied
+</FilesMatch>
+
+# Dizin listelemeyi kapat
+Options -Indexes
+
+# Güvenlik başlıkları ekle (XAMPP'de mod_headers varsa)
+<IfModule mod_headers.c>
+    # XSS koruması
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Content type sniffing'i engelle
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Clickjacking'i engelle
+    Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# RewriteEngine etkinse URL tabanlı koruma
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # .env dosyalarına erişimi engelle
+    RewriteRule ^\.env - [F,L]
+    
+    # Log dosyalarına erişimi engelle
+    RewriteRule ^logs/ - [F,L]
+    
+    # Config PHP dosyalarına doğrudan erişimi engelle
+    RewriteRule ^config/.*\.php$ - [F,L]
+    
+    # Includes PHP dosyalarına doğrudan erişimi engelle
+    RewriteRule ^includes/.*\.php$ - [F,L]
+</IfModule> 
