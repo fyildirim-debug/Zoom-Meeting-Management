@@ -495,23 +495,6 @@ if (file_exists('../database/zoom_meetings.db')) {
                             </select>
                         </div>
 
-                        <!-- Otomatik Veritabanı Adı Gösterimi -->
-                        <div class="mb-6">
-                            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
-                                <div class="flex items-center mb-3">
-                                    <svg class="w-6 h-6 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <h3 class="text-white font-semibold text-lg">Otomatik Veritabanı Oluşturma</h3>
-                                </div>
-                                <p class="text-white opacity-80 mb-3">
-                                    Veritabanı otomatik olarak benzersiz bir isimle oluşturulacak:
-                                </p>
-                                <div class="bg-white bg-opacity-20 rounded-lg p-3 font-mono text-center">
-                                    <span class="text-blue-300 font-semibold" id="auto-db-name">zoom_meetings_20241228_094500</span>
-                                </div>
-                            </div>
-                        </div>
 
                         <div id="mysql_fields">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -525,6 +508,17 @@ if (file_exists('../database/zoom_meetings.db')) {
                                 </div>
                             </div>
 
+                            <div class="mb-6">
+                                <label class="block text-white text-sm font-semibold mb-3">
+                                    Veritabanı Adı
+                                    <span class="text-red-300">*</span>
+                                </label>
+                                <input type="text" id="db_name" name="db_name" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="my_database_name" required>
+                                <p class="text-white opacity-70 text-sm mt-2">
+                                    ⚠️ Shared hosting kullanıyorsanız hosting sağlayıcınızın size verdiği veritabanı adını girin
+                                </p>
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
                                     <label class="block text-white text-sm font-semibold mb-3">Kullanıcı Adı</label>
@@ -533,6 +527,57 @@ if (file_exists('../database/zoom_meetings.db')) {
                                 <div>
                                     <label class="block text-white text-sm font-semibold mb-3">Şifre</label>
                                     <input type="password" id="db_password" name="db_password" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="••••••••">
+                                </div>
+                            </div>
+
+                            <!-- Database Creation Option -->
+                            <div class="mb-6">
+                                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mr-4">
+                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-white font-semibold text-lg">Veritabanı Oluşturma</h3>
+                                                <p class="text-white opacity-70 text-sm">Veritabanı otomatik olarak oluşturulsun mu?</p>
+                                            </div>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="auto_create_db" name="auto_create_db" class="sr-only peer" checked onchange="window.toggleAutoCreateDb()">
+                                            <div class="w-11 h-6 bg-white bg-opacity-30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div id="auto-create-info" class="space-y-3">
+                                        <div class="text-white text-sm">
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-green-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="font-semibold text-green-300 mb-1">Otomatik Oluşturma AÇIK</p>
+                                                    <p class="opacity-80">Sistem belirttiğiniz veritabanını oluşturmaya çalışacak. Lokal sunucular ve VPS'ler için uygundur.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="manual-create-info" class="hidden space-y-3">
+                                        <div class="text-white text-sm">
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-yellow-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="font-semibold text-yellow-300 mb-1">Manuel Veritabanı KAPALI</p>
+                                                    <p class="opacity-80">Veritabanı zaten mevcut olduğu varsayılır. Shared hosting için idealdir. Hosting sağlayıcınızdan aldığınız veritabanı adını kullanın.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1124,8 +1169,10 @@ if (file_exists('../database/zoom_meetings.db')) {
                 formData.append('db_type', document.getElementById('db_type').value);
                 formData.append('db_host', document.getElementById('db_host').value);
                 formData.append('db_port', document.getElementById('db_port').value);
+                formData.append('db_name', document.getElementById('db_name').value);
                 formData.append('db_username', document.getElementById('db_username').value);
                 formData.append('db_password', document.getElementById('db_password').value);
+                formData.append('auto_create_db', document.getElementById('auto_create_db').checked ? '1' : '0');
                 
                 // Send AJAX request to test database connection
                 fetch('process.php', {
@@ -1197,6 +1244,22 @@ if (file_exists('../database/zoom_meetings.db')) {
             }
         };
 
+        window.toggleAutoCreateDb = function() {
+            const checkbox = document.getElementById('auto_create_db');
+            const autoInfo = document.getElementById('auto-create-info');
+            const manualInfo = document.getElementById('manual-create-info');
+            
+            if (checkbox && autoInfo && manualInfo) {
+                if (checkbox.checked) {
+                    autoInfo.style.display = 'block';
+                    manualInfo.style.display = 'none';
+                } else {
+                    autoInfo.style.display = 'none';
+                    manualInfo.style.display = 'block';
+                }
+            }
+        };
+
         window.startInstallation = function() {
             const installBtn = document.getElementById('install-btn');
             const installText = document.getElementById('install-text');
@@ -1233,7 +1296,7 @@ if (file_exists('../database/zoom_meetings.db')) {
             
             // Add all form fields
             const fields = [
-                'db_type', 'db_host', 'db_port', 'db_username', 'db_password',
+                'db_type', 'db_host', 'db_port', 'db_name', 'db_username', 'db_password', 'auto_create_db',
                 'admin_name', 'admin_surname', 'admin_email', 'admin_password',
                 'admin_password_confirm', 'site_title', 'work_start', 'work_end',
                 'timezone', 'sample_data'
