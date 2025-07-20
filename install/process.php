@@ -129,42 +129,54 @@ function testDatabaseConnection($config) {
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
             ]);
             
-            // Test if user has proper credentials by running actual queries
+            // Test if user has proper credentials by running basic query
             $pdo->query('SELECT 1');
             
-            // Test if user can show databases (basic privilege check)
-            $pdo->query('SHOW DATABASES');
+            // Test if user can show databases (most hosting providers allow this)
+            try {
+                $pdo->query('SHOW DATABASES');
+            } catch (Exception $e) {
+                // SHOW DATABASES might be restricted, but continue if basic connection works
+            }
             
-            // Test if user can create database (critical for installation)
-            $testDbName = 'test_privileges_' . uniqid();
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$testDbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            // Optional: Test if user can create database (not all hosting environments allow this)
+            // This is now a non-fatal test - if it fails, we'll try during actual installation
+            try {
+                $testDbName = 'test_privileges_' . uniqid();
+                $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$testDbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                $pdo->exec("DROP DATABASE IF EXISTS `{$testDbName}`");
+            } catch (Exception $e) {
+                // CREATE/DROP DATABASE privileges might not be available
+                // This is acceptable - the system will try during installation
+            }
             
-            // Test if user can drop database (cleanup privilege check)
-            $pdo->exec("DROP DATABASE IF EXISTS `{$testDbName}`");
-            
-            // If all tests pass, user has proper credentials and privileges
-            return ['success' => true];
+            // If basic connection works, consider it successful
+            return ['success' => true, 'message' => 'MySQL bağlantısı başarılı'];
             
         } else {
-            // SQLite - just test if we can create file
+            // SQLite - test file creation with minimal requirements
             $dbPath = '../data/test_connection.sqlite';
             $dbDir = dirname($dbPath);
             
+            // Try to create data directory if it doesn't exist
             if (!file_exists($dbDir)) {
                 if (!mkdir($dbDir, 0755, true)) {
-                    throw new Exception('Data klasörü oluşturulamadı');
+                    throw new Exception('Data klasörü oluşturulamadı: ' . $dbDir);
                 }
             }
             
+            // Test SQLite file creation and basic operations
             $dsn = "sqlite:{$dbPath}";
             $pdo = new PDO($dsn, null, null, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             ]);
             
-            // Test connection and basic operations
+            // Test basic operations
             $pdo->query('SELECT 1');
-            $pdo->exec('CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY)');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY AUTOINCREMENT)');
+            $pdo->exec('INSERT INTO test_table VALUES (1)');
+            $pdo->exec('SELECT * FROM test_table');
             $pdo->exec('DROP TABLE IF EXISTS test_table');
             
             // Clean up test file
@@ -172,7 +184,7 @@ function testDatabaseConnection($config) {
                 unlink($dbPath);
             }
             
-            return ['success' => true];
+            return ['success' => true, 'message' => 'SQLite test başarılı'];
         }
         
     } catch (PDOException $e) {
@@ -292,7 +304,7 @@ function createDatabaseTables($pdo, $dbType) {
     $tables = [
         'departments' => "
             CREATE TABLE departments (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 name VARCHAR(255) NOT NULL,
                 weekly_limit INTEGER DEFAULT 10,
                 created_at " . ($dbType === 'mysql' ? 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' : 'DATETIME DEFAULT CURRENT_TIMESTAMP') . "
@@ -300,7 +312,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'users' => "
             CREATE TABLE users (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 name VARCHAR(255) NOT NULL,
                 surname VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
@@ -315,7 +327,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'zoom_accounts' => "
             CREATE TABLE zoom_accounts (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL,
                 api_key VARCHAR(255) NOT NULL,
@@ -335,7 +347,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'meetings' => "
             CREATE TABLE meetings (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 title VARCHAR(255) NOT NULL,
                 date DATE NOT NULL,
                 start_time TIME NOT NULL,
@@ -370,7 +382,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'settings' => "
             CREATE TABLE settings (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 setting_key VARCHAR(255) UNIQUE NOT NULL,
                 setting_value TEXT,
                 created_at " . ($dbType === 'mysql' ? 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' : 'DATETIME DEFAULT CURRENT_TIMESTAMP') . "
@@ -378,7 +390,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'notifications' => "
             CREATE TABLE notifications (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 user_id INTEGER NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 message TEXT NOT NULL,
@@ -390,7 +402,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'activity_logs' => "
             CREATE TABLE activity_logs (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 user_id INTEGER NOT NULL,
                 action VARCHAR(100) NOT NULL,
                 entity_type VARCHAR(50) NOT NULL,
@@ -404,7 +416,7 @@ function createDatabaseTables($pdo, $dbType) {
         ",
         'invitation_links' => "
             CREATE TABLE invitation_links (
-                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                 token VARCHAR(255) UNIQUE NOT NULL,
                 email VARCHAR(255) NULL,
                 department_id INTEGER NOT NULL,
@@ -831,7 +843,7 @@ function runDatabaseMigrations($pdo, $dbType) {
             try {
                 $createZoomAccountsSQL = "
                     CREATE TABLE zoom_accounts (
-                        id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                        id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                         name VARCHAR(255) NOT NULL DEFAULT 'Zoom Hesabı',
                         email VARCHAR(255) NOT NULL,
                         api_key VARCHAR(255) NOT NULL,
@@ -911,7 +923,7 @@ function runDatabaseMigrations($pdo, $dbType) {
                 if (!$tableExists) {
                     $activityLogsSQL = "
                         CREATE TABLE activity_logs (
-                            id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                            id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                             user_id INTEGER NOT NULL,
                             action VARCHAR(100) NOT NULL,
                             entity_type VARCHAR(50) NOT NULL,
@@ -1004,7 +1016,7 @@ function runDatabaseMigrations($pdo, $dbType) {
             if (!$tableExists) {
                 $zoomApiLogsSQL = "
                     CREATE TABLE zoom_api_logs (
-                        id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                        id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                         zoom_account_id INTEGER NOT NULL,
                         meeting_id INTEGER NULL,
                         action VARCHAR(50) NOT NULL,
@@ -1165,7 +1177,7 @@ function runDatabaseMigrations($pdo, $dbType) {
             if (!$tableExists) {
                 $invitationLinksSQL = "
                     CREATE TABLE invitation_links (
-                        id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT') . " PRIMARY KEY,
+                        id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
                         token VARCHAR(255) UNIQUE NOT NULL,
                         email VARCHAR(255) NULL,
                         department_id INTEGER NOT NULL,
