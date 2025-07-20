@@ -66,27 +66,36 @@ function generateDatabaseName() {
 function createDatabase($config) {
     try {
         if ($config['type'] === 'mysql') {
-            // Connect to MySQL server without selecting database
-            $dsn = "mysql:host={$config['host']};port={$config['port']};charset=utf8mb4";
-            $pdo = new PDO($dsn, $config['username'], $config['password'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-            ]);
-            
-            // Generate unique database name
             $dbName = $config['database'];
             
-            // Create database
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            
-            // Now connect to the created database
-            $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$dbName};charset=utf8mb4";
-            $pdo = new PDO($dsn, $config['username'], $config['password'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-            ]);
+            if (isset($config['auto_create_db']) && $config['auto_create_db']) {
+                // Auto-create mode: Connect to MySQL server and create database
+                $dsn = "mysql:host={$config['host']};port={$config['port']};charset=utf8mb4";
+                $pdo = new PDO($dsn, $config['username'], $config['password'], [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                ]);
+                
+                // Create database
+                $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                
+                // Now connect to the created database
+                $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$dbName};charset=utf8mb4";
+                $pdo = new PDO($dsn, $config['username'], $config['password'], [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                ]);
+            } else {
+                // Manual mode: Connect directly to existing database
+                $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$dbName};charset=utf8mb4";
+                $pdo = new PDO($dsn, $config['username'], $config['password'], [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                ]);
+            }
             
         } else {
             // SQLite
@@ -121,7 +130,7 @@ function createDatabase($config) {
 function testDatabaseConnection($config) {
     try {
         if ($config['type'] === 'mysql') {
-            // Test connection to MySQL server with proper authentication
+            // First test connection to MySQL server
             $dsn = "mysql:host={$config['host']};port={$config['port']};charset=utf8mb4";
             $pdo = new PDO($dsn, $config['username'], $config['password'], [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -132,26 +141,52 @@ function testDatabaseConnection($config) {
             // Test if user has proper credentials by running basic query
             $pdo->query('SELECT 1');
             
-            // Test if user can show databases (most hosting providers allow this)
-            try {
-                $pdo->query('SHOW DATABASES');
-            } catch (Exception $e) {
-                // SHOW DATABASES might be restricted, but continue if basic connection works
+            // If auto_create_db is enabled, test CREATE privileges
+            if (isset($config['auto_create_db']) && $config['auto_create_db']) {
+                try {
+                    $testDbName = 'test_privileges_' . uniqid();
+                    $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$testDbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                    $pdo->exec("DROP DATABASE IF EXISTS `{$testDbName}`");
+                    return ['success' => true, 'message' => 'MySQL bağlantısı başarılı - Veritabanı oluşturma yetkisi mevcut'];
+                } catch (Exception $e) {
+                    return ['success' => false, 'message' => 'MySQL bağlantısı başarılı ancak veritabanı oluşturma yetkisi yok. Lütfen "Veritabanı Oluşturma" seçeneğini kapatın ve mevcut veritabanı adını girin.'];
+                }
+            } else {
+                // Manual database mode - test if the specified database exists and is accessible
+                try {
+                    $dbName = $config['database'];
+                    $testDsn = "mysql:host={$config['host']};port={$config['port']};dbname={$dbName};charset=utf8mb4";
+                    $testPdo = new PDO($testDsn, $config['username'], $config['password'], [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                    ]);
+                    
+                    // Test if user can perform basic operations on the database
+                    $testPdo->query('SELECT 1');
+                    
+                    // Test if user has CREATE TABLE privileges
+                    try {
+                        $testPdo->exec("CREATE TABLE IF NOT EXISTS test_table_" . uniqid() . " (id INT AUTO_INCREMENT PRIMARY KEY)");
+                        $stmt = $testPdo->query("SHOW TABLES LIKE 'test_table_%'");
+                        $testTable = $stmt->fetch();
+                        if ($testTable) {
+                            $tableName = array_values($testTable)[0];
+                            $testPdo->exec("DROP TABLE `{$tableName}`");
+                        }
+                        return ['success' => true, 'message' => 'Veritabanı bağlantısı başarılı - Tablo oluşturma yetkisi mevcut'];
+                    } catch (Exception $e) {
+                        return ['success' => false, 'message' => 'Veritabanına bağlantı başarılı ancak tablo oluşturma yetkisi yok. Lütfen veritabanı kullanıcısına CREATE, ALTER, DROP yetkilerini verin.'];
+                    }
+                    
+                } catch (Exception $e) {
+                    if (strpos($e->getMessage(), 'Unknown database') !== false) {
+                        return ['success' => false, 'message' => 'Belirtilen veritabanı bulunamadı: "' . $config['database'] . '". Lütfen doğru veritabanı adını girin veya "Veritabanı Oluşturma" seçeneğini açın.'];
+                    } else {
+                        return ['success' => false, 'message' => 'Veritabanına bağlantı hatası: ' . $e->getMessage()];
+                    }
+                }
             }
-            
-            // Optional: Test if user can create database (not all hosting environments allow this)
-            // This is now a non-fatal test - if it fails, we'll try during actual installation
-            try {
-                $testDbName = 'test_privileges_' . uniqid();
-                $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$testDbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-                $pdo->exec("DROP DATABASE IF EXISTS `{$testDbName}`");
-            } catch (Exception $e) {
-                // CREATE/DROP DATABASE privileges might not be available
-                // This is acceptable - the system will try during installation
-            }
-            
-            // If basic connection works, consider it successful
-            return ['success' => true, 'message' => 'MySQL bağlantısı başarılı'];
             
         } else {
             // SQLite - test file creation with minimal requirements
@@ -1242,14 +1277,16 @@ try {
         $dbType = sanitizeInput($_POST['db_type'] ?? '');
         
         if ($dbType === 'mysql') {
-            validateRequiredFields(['db_host', 'db_port', 'db_username'], $_POST);
+            validateRequiredFields(['db_host', 'db_port', 'db_name', 'db_username'], $_POST);
             
             $config = [
                 'type' => 'mysql',
                 'host' => sanitizeInput($_POST['db_host']),
                 'port' => sanitizeInput($_POST['db_port']),
+                'database' => sanitizeInput($_POST['db_name']),
                 'username' => sanitizeInput($_POST['db_username']),
-                'password' => $_POST['db_password'] ?? ''
+                'password' => $_POST['db_password'] ?? '',
+                'auto_create_db' => isset($_POST['auto_create_db']) && $_POST['auto_create_db'] === '1'
             ];
             
             $result = testDatabaseConnection($config);
@@ -1291,15 +1328,18 @@ try {
         $dbType = sanitizeInput($_POST['db_type']);
         
         if ($dbType === 'mysql') {
-            validateRequiredFields(['db_host', 'db_port', 'db_username'], $_POST);
+            validateRequiredFields(['db_host', 'db_port', 'db_name', 'db_username'], $_POST);
+            
+            $autoCreateDb = isset($_POST['auto_create_db']) && $_POST['auto_create_db'] === '1';
             
             $dbConfig = [
                 'type' => 'mysql',
                 'host' => sanitizeInput($_POST['db_host']),
                 'port' => sanitizeInput($_POST['db_port']),
-                'database' => generateDatabaseName(), // Auto-generated database name
+                'database' => sanitizeInput($_POST['db_name']),
                 'username' => sanitizeInput($_POST['db_username']),
-                'password' => $_POST['db_password'] ?? ''
+                'password' => $_POST['db_password'] ?? '',
+                'auto_create_db' => $autoCreateDb
             ];
         } else {
             $dbConfig = [
