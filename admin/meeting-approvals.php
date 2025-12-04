@@ -117,14 +117,22 @@ try {
             $whereClause = '';
     }
     
-    // Sıralama mantığı
-    $orderClause = match($sort) {
-        'date_asc' => "m.date ASC, m.start_time ASC",
-        'date_desc' => "m.date DESC, m.start_time DESC",
-        'created_desc' => "m.created_at DESC",
-        'created_asc' => "m.created_at ASC",
-        default => // smart sorting
-            "CASE 
+    // Sıralama mantığı (PHP 7.x uyumlu)
+    switch ($sort) {
+        case 'date_asc':
+            $orderClause = "m.date ASC, m.start_time ASC";
+            break;
+        case 'date_desc':
+            $orderClause = "m.date DESC, m.start_time DESC";
+            break;
+        case 'created_desc':
+            $orderClause = "m.created_at DESC";
+            break;
+        case 'created_asc':
+            $orderClause = "m.created_at ASC";
+            break;
+        default: // smart sorting
+            $orderClause = "CASE 
                 WHEN m.status = 'pending' THEN 0 
                 WHEN m.status = 'approved' AND m.date >= $nowFunc THEN 1
                 WHEN m.status = 'approved' AND m.date < $nowFunc THEN 3
@@ -140,8 +148,9 @@ try {
                 THEN m.date 
                 ELSE NULL 
             END DESC,
-            m.start_time ASC"
-    };
+            m.start_time ASC";
+            break;
+    }
     
     // Build the main query
     $mainQuery = "
