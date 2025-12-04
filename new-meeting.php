@@ -44,64 +44,115 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($startTime >= $endTime) {
             $error = 'Bitiş saati başlangıç saatinden sonra olmalıdır.';
         } else {
-            // Çakışma kontrolleri
-            
+            // Sistem kapatma kontrolü
+            $closureCheck = checkMeetingDateAllowed($date);
+            if (!$closureCheck['allowed']) {
+                $error = $closureCheck['message'];
+            }
             // Kullanıcının kendi çakışması
-            if (checkUserConflict($currentUser['id'], $date, $startTime, $endTime)) {
+            elseif (checkUserConflict($currentUser['id'], $date, $startTime, $endTime)) {
                 $error = 'Bu tarih ve saatte zaten bir toplantınız bulunuyor.';
             }
             // Birim haftalık limit kontrolü
             elseif (!checkDepartmentWeeklyLimit($currentUser['department_id'], $date)) {
                 $error = 'Biriminizin haftalık toplantı limiti dolmuş.';
             } else {
-                // Toplantı kaydı oluştur
-                try {
-                    $stmt = $pdo->prepare("
-                        INSERT INTO meetings (
-                            title, date, start_time, end_time, moderator, description, 
-                            participants_count, user_id, department_id, status
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-                    ");
+                // Tekrarlı toplantı mı kontrol et
+                $isRecurring = isset($_POST['is_recurring']) && $_POST['is_recurring'] == '1';
+                $recurringDays = $_POST['recurring_days'] ?? [];
+                $recurringWeeks = min(8, max(1, (int)($_POST['recurring_weeks'] ?? 2)));
+                
+                // Toplantı tarihlerini hesapla
+                $meetingDates = [];
+                
+                if ($isRecurring && !empty($recurringDays)) {
+                    // Tekrarlı toplantı - tarihleri hesapla
+                    $startDateObj = new DateTime($date);
+                    $endDateObj = clone $startDateObj;
+                    $endDateObj->modify('+' . ($recurringWeeks * 7) . ' days');
                     
-                    $result = $stmt->execute([
-                        $title, $date, $startTime, $endTime, $moderator, 
-                        $description, $participantsCount, $currentUser['id'], $currentUser['department_id']
-                    ]);
+                    $currentDate = clone $startDateObj;
+                    while ($currentDate < $endDateObj) {
+                        $dayOfWeek = (int)$currentDate->format('w'); // 0=Pazar, 1=Pazartesi...
+                        if (in_array($dayOfWeek, $recurringDays)) {
+                            $dateStr = $currentDate->format('Y-m-d');
+                            // Kapatma kontrolü
+                            $closureCheck = checkMeetingDateAllowed($dateStr);
+                            if ($closureCheck['allowed']) {
+                                // Çakışma kontrolü
+                                if (!checkUserConflict($currentUser['id'], $dateStr, $startTime, $endTime)) {
+                                    $meetingDates[] = $dateStr;
+                                }
+                            }
+                        }
+                        $currentDate->modify('+1 day');
+                    }
                     
-                    if ($result) {
-                        $meetingId = $pdo->lastInsertId();
-                        writeLog("New meeting request created: ID $meetingId by user " . $currentUser['id'], 'info');
+                    if (empty($meetingDates)) {
+                        $error = 'Seçilen tarih aralığında uygun gün bulunamadı (kapalı günler veya çakışmalar nedeniyle).';
+                    }
+                } else {
+                    // Tek toplantı
+                    $meetingDates[] = $date;
+                }
+                
+                // Toplantıları oluştur
+                if (empty($error) && !empty($meetingDates)) {
+                    try {
+                        $createdCount = 0;
+                        $stmt = $pdo->prepare("
+                            INSERT INTO meetings (
+                                title, date, start_time, end_time, moderator, description, 
+                                participants_count, user_id, department_id, status
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+                        ");
                         
-                        // Aktivite kaydet
-                        logActivity('create_meeting', 'meeting', $meetingId,
-                            'Yeni toplantı talebi oluşturdu: ' . $title . ' (' . $date . ' ' . $startTime . ')',
-                            $currentUser['id']);
-                        
-                        // Admin'lere bildirim gönder (opsiyonel)
-                        $stmt = $pdo->prepare("SELECT id FROM users WHERE role = 'admin'");
-                        $stmt->execute();
-                        $admins = $stmt->fetchAll();
-                        
-                        foreach ($admins as $admin) {
-                            sendNotification(
-                                $admin['id'], 
-                                'Yeni Toplantı Talebi', 
-                                $currentUser['name'] . ' ' . $currentUser['surname'] . ' tarafından yeni bir toplantı talebi oluşturuldu.',
-                                'info'
-                            );
+                        foreach ($meetingDates as $meetingDate) {
+                            $result = $stmt->execute([
+                                $title, $meetingDate, $startTime, $endTime, $moderator, 
+                                $description, $participantsCount, $currentUser['id'], $currentUser['department_id']
+                            ]);
+                            
+                            if ($result) {
+                                $meetingId = $pdo->lastInsertId();
+                                $createdCount++;
+                                writeLog("New meeting request created: ID $meetingId by user " . $currentUser['id'], 'info');
+                                
+                                logActivity('create_meeting', 'meeting', $meetingId,
+                                    'Yeni toplantı talebi: ' . $title . ' (' . $meetingDate . ' ' . $startTime . ')',
+                                    $currentUser['id']);
+                            }
                         }
                         
-                        $success = 'Toplantı talebiniz başarıyla oluşturuldu. Onay beklemektedir.';
-                        
-                        // Formu temizle
-                        $title = $date = $startTime = $endTime = $moderator = $description = '';
-                        $participantsCount = 0;
-                    } else {
-                        $error = 'Toplantı talebi oluşturulurken hata oluştu.';
+                        if ($createdCount > 0) {
+                            // Admin'lere tek bildirim gönder
+                            $stmt = $pdo->prepare("SELECT id FROM users WHERE role = 'admin'");
+                            $stmt->execute();
+                            $admins = $stmt->fetchAll();
+                            
+                            $notifMessage = $currentUser['name'] . ' ' . $currentUser['surname'] . 
+                                ' tarafından ' . $createdCount . ' toplantı talebi oluşturuldu.';
+                            
+                            foreach ($admins as $admin) {
+                                sendNotification($admin['id'], 'Yeni Toplantı Talepleri', $notifMessage, 'info');
+                            }
+                            
+                            if ($createdCount == 1) {
+                                $success = 'Toplantı talebiniz başarıyla oluşturuldu. Onay beklemektedir.';
+                            } else {
+                                $success = $createdCount . ' toplantı talebi başarıyla oluşturuldu. Onay beklemektedir.';
+                            }
+                            
+                            // Formu temizle
+                            $title = $date = $startTime = $endTime = $moderator = $description = '';
+                            $participantsCount = 0;
+                        } else {
+                            $error = 'Toplantı talebi oluşturulurken hata oluştu.';
+                        }
+                    } catch (Exception $e) {
+                        writeLog("Error creating meeting: " . $e->getMessage(), 'error');
+                        $error = 'Veritabanı hatası oluştu.';
                     }
-                } catch (Exception $e) {
-                    writeLog("Error creating meeting: " . $e->getMessage(), 'error');
-                    $error = 'Veritabanı hatası oluştu.';
                 }
             }
         }
@@ -327,22 +378,67 @@ include 'includes/sidebar.php';
                     <p class="text-xs text-gray-500  mt-1">Zoom hesap seçimi için önemlidir</p>
                 </div>
 
-                <!-- Description -->
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700  mb-2">
-                        Toplantı Açıklaması
-                    </label>
-                    <textarea 
-                        id="description" 
-                        name="description" 
-                        rows="4"
-                        class="w-full px-4 py-3 border border-gray-300  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white  text-gray-900 "
-                        placeholder="Toplantının amacı, gündem maddeleri ve diğer önemli bilgiler..."
-                        maxlength="1000"
-                    ><?php echo htmlspecialchars($description ?? ''); ?></textarea>
-                    <p class="text-xs text-gray-500  mt-1">
-                        <span id="description-count">0</span>/1000 karakter
-                    </p>
+                <!-- Tekrarlama Seçenekleri -->
+                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="is_recurring" name="is_recurring" value="1" 
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                               onchange="toggleRecurringOptions()">
+                        <label for="is_recurring" class="ml-2 text-sm font-medium text-gray-700">
+                            <i class="fas fa-redo mr-1"></i>Tekrarlayan Toplantı
+                        </label>
+                    </div>
+                    
+                    <div id="recurring-options" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Hangi Günler?</label>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="1" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Pazartesi</span>
+                                </label>
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="2" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Salı</span>
+                                </label>
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="3" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Çarşamba</span>
+                                </label>
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="4" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Perşembe</span>
+                                </label>
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="5" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Cuma</span>
+                                </label>
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="6" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Cumartesi</span>
+                                </label>
+                                <label class="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="checkbox" name="recurring_days[]" value="0" class="mr-2 text-blue-600">
+                                    <span class="text-sm">Pazar</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kaç Hafta Tekrarlansın?</label>
+                                <input type="number" name="recurring_weeks" id="recurring_weeks" min="1" max="8" value="2"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Başlangıç tarihinden itibaren</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Önizleme</label>
+                                <div id="recurring-preview" class="text-sm text-gray-600 bg-white border border-gray-200 rounded-lg p-2 max-h-24 overflow-y-auto">
+                                    Gün seçin...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Department Info -->
@@ -420,7 +516,7 @@ $workEndTime = defined('WORK_END') ? WORK_END : '18:00';
 
 // Working hours restrictions removed
 
-$additionalScripts = '
+?>
 <script>
 // Success redirect functionality
 function redirectToMyMeetings() {
@@ -457,6 +553,10 @@ document.addEventListener("DOMContentLoaded", function() {
     var descriptionInput = document.getElementById("description");
     var durationDisplay = document.getElementById("duration-display");
     var descriptionCount = document.getElementById("description-count");
+    
+    // Null kontrolü - description alanı yoksa atla
+    if (!descriptionInput) descriptionInput = { value: '', addEventListener: function() {} };
+    if (!descriptionCount) descriptionCount = { textContent: '', classList: { add: function(){}, remove: function(){} } };
     
     // Update duration when time changes
     function updateDuration() {
@@ -698,8 +798,76 @@ function autoSave() {
 document.querySelectorAll("#meeting-form input, #meeting-form textarea").forEach(input => {
     input.addEventListener("input", autoSave);
 });
-</script>
-';
 
+// Tekrarlama seçenekleri toggle
+function toggleRecurringOptions() {
+    var isRecurring = document.getElementById("is_recurring").checked;
+    var options = document.getElementById("recurring-options");
+    options.classList.toggle("hidden", !isRecurring);
+    if (isRecurring) {
+        updateRecurringPreview();
+    }
+}
+
+// Tekrarlama önizlemesi güncelle
+function updateRecurringPreview() {
+    var dateInput = document.getElementById("date").value;
+    if (!dateInput) {
+        document.getElementById("recurring-preview").innerHTML = "Önce başlangıç tarihi seçin";
+        return;
+    }
+    
+    var selectedDays = [];
+    document.querySelectorAll("input[name=\"recurring_days[]\"]").forEach(function(cb) {
+        if (cb.checked) selectedDays.push(parseInt(cb.value));
+    });
+    
+    if (selectedDays.length === 0) {
+        document.getElementById("recurring-preview").innerHTML = "Gün seçin...";
+        return;
+    }
+    
+    var weeks = parseInt(document.getElementById("recurring_weeks").value) || 2;
+    var startDate = new Date(dateInput);
+    var dates = [];
+    var dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+    
+    // Başlangıç tarihinden itibaren haftalık olarak seçili günleri bul
+    for (var w = 0; w < weeks; w++) {
+        for (var d = 0; d < 7; d++) {
+            var checkDate = new Date(startDate);
+            checkDate.setDate(startDate.getDate() + (w * 7) + d);
+            
+            if (selectedDays.includes(checkDate.getDay()) && checkDate >= startDate) {
+                var formatted = checkDate.toLocaleDateString("tr-TR", {day: "2-digit", month: "2-digit", year: "numeric"});
+                dates.push(dayNames[checkDate.getDay()] + " - " + formatted);
+            }
+        }
+    }
+    
+    if (dates.length > 0) {
+        document.getElementById("recurring-preview").innerHTML = 
+            "<strong>" + dates.length + " toplantı:</strong><br>" + dates.join("<br>");
+    } else {
+        document.getElementById("recurring-preview").innerHTML = "Uygun tarih bulunamadı";
+    }
+}
+
+// Event listener for recurring options
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("input[name=\"recurring_days[]\"]").forEach(function(cb) {
+        cb.addEventListener("change", updateRecurringPreview);
+    });
+    document.getElementById("recurring_weeks").addEventListener("change", updateRecurringPreview);
+    document.getElementById("date").addEventListener("change", function() {
+        if (document.getElementById("is_recurring").checked) {
+            updateRecurringPreview();
+        }
+    });
+    document.getElementById("is_recurring").addEventListener("change", toggleRecurringOptions);
+});
+</script>
+
+<?php
 include 'includes/footer.php';
 ?>

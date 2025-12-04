@@ -397,6 +397,20 @@ function createDatabaseTables($pdo, $dbType) {
                 meeting_link VARCHAR(500) NULL,
                 meeting_id VARCHAR(255) NULL,
                 meeting_password VARCHAR(255) NULL,
+                zoom_meeting_id VARCHAR(255) NULL,
+                zoom_uuid VARCHAR(500) NULL,
+                zoom_join_url VARCHAR(1000) NULL,
+                zoom_start_url TEXT NULL,
+                zoom_password VARCHAR(255) NULL,
+                zoom_host_id VARCHAR(255) NULL,
+                parent_meeting_id VARCHAR(255) NULL,
+                is_recurring_occurrence TINYINT DEFAULT 0,
+                has_recording TINYINT DEFAULT 0,
+                recording_url TEXT NULL,
+                recording_password VARCHAR(255) NULL,
+                recording_size BIGINT DEFAULT 0,
+                actual_duration INTEGER DEFAULT 0,
+                actual_participants INTEGER DEFAULT 0,
                 rejection_reason TEXT NULL,
                 approved_at " . ($dbType === 'mysql' ? 'DATETIME NULL' : 'DATETIME NULL') . ",
                 approved_by INTEGER NULL,
@@ -412,7 +426,9 @@ function createDatabaseTables($pdo, $dbType) {
                 , FOREIGN KEY (zoom_account_id) REFERENCES zoom_accounts(id)
                 , FOREIGN KEY (approved_by) REFERENCES users(id)
                 , FOREIGN KEY (rejected_by) REFERENCES users(id)
-                , FOREIGN KEY (cancelled_by) REFERENCES users(id)' : '') . "
+                , FOREIGN KEY (cancelled_by) REFERENCES users(id)
+                , INDEX idx_zoom_meeting_id (zoom_meeting_id)
+                , INDEX idx_date_status (date, status)' : '') . "
             )
         ",
         'settings' => "
@@ -467,6 +483,14 @@ function createDatabaseTables($pdo, $dbType) {
                 , INDEX idx_status (status)
                 , FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
                 , FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE' : '') . "
+            )
+        ",
+        'migrations' => "
+            CREATE TABLE migrations (
+                id INTEGER " . ($dbType === 'mysql' ? 'AUTO_INCREMENT PRIMARY KEY' : 'PRIMARY KEY AUTOINCREMENT') . ",
+                migration_name VARCHAR(255) UNIQUE NOT NULL,
+                batch INTEGER NOT NULL DEFAULT 1,
+                executed_at " . ($dbType === 'mysql' ? 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' : 'DATETIME DEFAULT CURRENT_TIMESTAMP') . "
             )
         "
     ];
@@ -589,6 +613,7 @@ function createConfigFiles($dbConfig, $systemConfig) {
     $mainConfigContent .= "require_once __DIR__ . '/database.php';\n\n";
     $mainConfigContent .= "// Uygulama sabitleri (direkt tanımlanmış)\n";
     $mainConfigContent .= "define('APP_NAME', '" . addslashes($systemConfig['site_title']) . "');\n";
+    $mainConfigContent .= "define('APP_VERSION', '1.2.0');\n";
     $mainConfigContent .= "define('APP_TIMEZONE', '" . $systemConfig['timezone'] . "');\n";
     $mainConfigContent .= "define('WORK_START', '" . $systemConfig['work_start'] . "');\n";
     $mainConfigContent .= "define('WORK_END', '" . $systemConfig['work_end'] . "');\n";

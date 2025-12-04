@@ -5,13 +5,13 @@
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
                 <div>
-                    © <?php echo date('Y'); ?> Zoom Meeting Management System
+                    &copy; <?php echo date('Y'); ?> Zoom Meeting Management System
                 </div>
                 
                 <div class="flex items-center space-x-4 mt-2 md:mt-0">
                     <!-- Version Info -->
-                    <div>
-                        v1.0.0
+                    <div class="font-medium text-blue-600">
+                        v<?php echo defined('APP_VERSION') ? APP_VERSION : '1.0.0'; ?>
                     </div>
                     
                     <!-- Server Time -->

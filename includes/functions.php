@@ -669,3 +669,116 @@ function getActivityIcon($action, $entityType) {
     
     return $icons[$entityType][$action] ?? 'fa-info text-gray-600';
 }
+
+/**
+ * Sistem Kapatma Kontrol Fonksiyonları
+ */
+
+/**
+ * Belirli bir tarihin kapalı olup olmadığını kontrol et
+ * @param string $date Kontrol edilecek tarih (Y-m-d formatında)
+ * @return array|false Kapalıysa kapatma bilgisi, değilse false
+ */
+function isDateClosed($date) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT * FROM system_closures 
+            WHERE is_active = 1 
+            AND ? BETWEEN start_date AND end_date
+            ORDER BY start_date ASC
+            LIMIT 1
+        ");
+        $stmt->execute([$date]);
+        $closure = $stmt->fetch();
+        
+        return $closure ?: false;
+    } catch (Exception $e) {
+        // Tablo yoksa veya hata varsa false döndür
+        return false;
+    }
+}
+
+/**
+ * Tarih aralığının kapalı günlerle çakışıp çakışmadığını kontrol et
+ * @param string $startDate Başlangıç tarihi
+ * @param string $endDate Bitiş tarihi (opsiyonel, tek gün için boş bırakılabilir)
+ * @return array|false Çakışma varsa kapatma bilgisi, yoksa false
+ */
+function getClosureForDateRange($startDate, $endDate = null) {
+    global $pdo;
+    
+    if ($endDate === null) {
+        $endDate = $startDate;
+    }
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT * FROM system_closures 
+            WHERE is_active = 1 
+            AND (
+                (start_date <= ? AND end_date >= ?) OR
+                (start_date <= ? AND end_date >= ?) OR
+                (start_date >= ? AND end_date <= ?)
+            )
+            ORDER BY start_date ASC
+            LIMIT 1
+        ");
+        $stmt->execute([$startDate, $startDate, $endDate, $endDate, $startDate, $endDate]);
+        $closure = $stmt->fetch();
+        
+        return $closure ?: false;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * Aktif kapatma dönemlerini al
+ * @return array Aktif kapatma listesi
+ */
+function getActiveClosures() {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->query("
+            SELECT * FROM system_closures 
+            WHERE is_active = 1 
+            AND end_date >= CURDATE()
+            ORDER BY start_date ASC
+        ");
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+/**
+ * Toplantı tarihi için kapatma kontrolü yap
+ * Hata mesajı ile birlikte döndürür
+ * @param string $date Toplantı tarihi
+ * @return array ['allowed' => bool, 'message' => string, 'closure' => array|null]
+ */
+function checkMeetingDateAllowed($date) {
+    $closure = isDateClosed($date);
+    
+    if ($closure) {
+        return [
+            'allowed' => false,
+            'message' => sprintf(
+                'Bu tarihte toplantı oluşturulamaz. %s (%s - %s)',
+                $closure['title'],
+                formatDateTurkish($closure['start_date']),
+                formatDateTurkish($closure['end_date'])
+            ),
+            'closure' => $closure
+        ];
+    }
+    
+    return [
+        'allowed' => true,
+        'message' => '',
+        'closure' => null
+    ];
+}

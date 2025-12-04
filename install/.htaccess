@@ -1,0 +1,3 @@
+# Kurulum tamamlandıktan sonra bu klasöre erişimi engelle
+Order Deny,Allow
+Deny from all

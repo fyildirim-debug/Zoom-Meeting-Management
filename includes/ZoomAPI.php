@@ -415,6 +415,42 @@ class ZoomAPI {
     }
     
     /**
+     * Güncel start URL al (fresh token ile)
+     * Her çağrıda Zoom API'den güncel URL alır
+     */
+    public function getFreshStartUrl($meetingId) {
+        try {
+            $response = $this->makeRequest("/meetings/$meetingId");
+            
+            if ($response['success'] && isset($response['data']['start_url'])) {
+                writeLog("🔐 FRESH START URL FETCHED: Meeting ID=$meetingId için fresh start URL alındı", 'info');
+                
+                return [
+                    'success' => true,
+                    'data' => [
+                        'start_url' => $response['data']['start_url'],
+                        'join_url' => $response['data']['join_url'] ?? null,
+                        'password' => $response['data']['password'] ?? null,
+                        'meeting_id' => $response['data']['id'] ?? $meetingId
+                    ]
+                ];
+            }
+            
+            return [
+                'success' => false,
+                'message' => 'Start URL alınamadı'
+            ];
+            
+        } catch (Exception $e) {
+            writeLog("Get fresh start URL failed: " . $e->getMessage(), 'error');
+            return [
+                'success' => false,
+                'message' => 'Start URL alınamadı: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
      * Kullanıcının toplantılarını listele
      */
     public function listUserMeetings($userEmail = 'me', $type = 'scheduled') {
@@ -998,6 +1034,247 @@ class ZoomAPI {
         } catch (Exception $e) {
             writeLog("Error enhancing start URL: " . $e->getMessage(), 'error');
             return $originalStartUrl; // Hata durumunda original URL'i döndür
+        }
+    }
+    
+    /**
+     * Zoom Cloud kayıtlarını al
+     * Kullanıcıların toplantı kayıtlarına erişmesini sağlar
+     * 
+     * @param string $meetingId Zoom toplantı ID'si (opsiyonel - belirtilirse sadece o toplantının kayıtları)
+     * @param string $userId Zoom kullanıcı ID'si veya 'me' (varsayılan)
+     * @param string $from Başlangıç tarihi (YYYY-MM-DD formatı)
+     * @param string $to Bitiş tarihi (YYYY-MM-DD formatı)
+     * @return array Kayıt listesi
+     */
+    public function getCloudRecordings($meetingId = null, $userId = 'me', $from = null, $to = null) {
+        try {
+            // Belirli bir toplantının kayıtları
+            if ($meetingId) {
+                writeLog("📹 Getting cloud recordings for meeting: $meetingId", 'info');
+                
+                $response = $this->makeRequest("/meetings/$meetingId/recordings");
+                
+                if ($response['success']) {
+                    $recordings = $response['data'];
+                    
+                    writeLog("✅ Found recordings for meeting $meetingId", 'info');
+                    
+                    return [
+                        'success' => true,
+                        'message' => 'Kayıtlar başarıyla alındı',
+                        'data' => [
+                            'meeting_id' => $meetingId,
+                            'recording_count' => count($recordings['recording_files'] ?? []),
+                            'recordings' => $recordings
+                        ]
+                    ];
+                }
+                
+                return [
+                    'success' => false,
+                    'message' => 'Toplantı kayıtları bulunamadı'
+                ];
+            }
+            
+            // Kullanıcının tüm kayıtları
+            writeLog("📹 Getting all cloud recordings for user: $userId", 'info');
+            
+            // Tarih parametreleri
+            $from = $from ?? date('Y-m-d', strtotime('-30 days'));
+            $to = $to ?? date('Y-m-d');
+            
+            $endpoint = "/users/$userId/recordings?from=$from&to=$to&page_size=100";
+            $response = $this->makeRequest($endpoint);
+            
+            if ($response['success']) {
+                $data = $response['data'];
+                $meetings = $data['meetings'] ?? [];
+                
+                writeLog("✅ Found " . count($meetings) . " meetings with recordings", 'info');
+                
+                return [
+                    'success' => true,
+                    'message' => 'Kayıtlar başarıyla alındı',
+                    'data' => [
+                        'total_records' => $data['total_records'] ?? count($meetings),
+                        'from' => $from,
+                        'to' => $to,
+                        'meetings' => $meetings
+                    ]
+                ];
+            }
+            
+            return [
+                'success' => false,
+                'message' => 'Kayıtlar alınamadı'
+            ];
+            
+        } catch (Exception $e) {
+            writeLog("❌ Error getting cloud recordings: " . $e->getMessage(), 'error');
+            return [
+                'success' => false,
+                'message' => 'Kayıtlar alınırken hata oluştu: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Toplantı sonrası raporu al
+     * Katılımcı bilgileri, süre, vs. içerir
+     * 
+     * @param string $meetingId Zoom toplantı ID'si veya UUID
+     * @return array Toplantı raporu
+     */
+    public function getMeetingReport($meetingId) {
+        try {
+            writeLog("📊 Getting meeting report for: $meetingId", 'info');
+            
+            $report = [
+                'meeting_id' => $meetingId,
+                'participants' => [],
+                'details' => null,
+                'poll_results' => [],
+                'qa_report' => []
+            ];
+            
+            // 1. Toplantı detayları
+            try {
+                $detailsResponse = $this->makeRequest("/past_meetings/$meetingId");
+                if ($detailsResponse['success']) {
+                    $report['details'] = $detailsResponse['data'];
+                    writeLog("✅ Meeting details retrieved", 'info');
+                }
+            } catch (Exception $e) {
+                writeLog("⚠️ Could not get meeting details: " . $e->getMessage(), 'warning');
+            }
+            
+            // 2. Katılımcı listesi
+            try {
+                $participantsResponse = $this->makeRequest("/past_meetings/$meetingId/participants?page_size=300");
+                if ($participantsResponse['success']) {
+                    $report['participants'] = $participantsResponse['data']['participants'] ?? [];
+                    $report['total_participants'] = $participantsResponse['data']['total_records'] ?? count($report['participants']);
+                    writeLog("✅ Found " . count($report['participants']) . " participants", 'info');
+                }
+            } catch (Exception $e) {
+                writeLog("⚠️ Could not get participants: " . $e->getMessage(), 'warning');
+            }
+            
+            // 3. Anket sonuçları (varsa)
+            try {
+                $pollsResponse = $this->makeRequest("/past_meetings/$meetingId/polls");
+                if ($pollsResponse['success']) {
+                    $report['poll_results'] = $pollsResponse['data']['questions'] ?? [];
+                    writeLog("✅ Poll results retrieved", 'info');
+                }
+            } catch (Exception $e) {
+                // Anket olmayabilir, hata değil
+                writeLog("ℹ️ No poll results available", 'info');
+            }
+            
+            // 4. Q&A raporu (varsa)
+            try {
+                $qaResponse = $this->makeRequest("/past_meetings/$meetingId/qa");
+                if ($qaResponse['success']) {
+                    $report['qa_report'] = $qaResponse['data']['questions'] ?? [];
+                    writeLog("✅ Q&A report retrieved", 'info');
+                }
+            } catch (Exception $e) {
+                // Q&A olmayabilir, hata değil
+                writeLog("ℹ️ No Q&A report available", 'info');
+            }
+            
+            // Özet bilgiler hesapla
+            if ($report['details']) {
+                $report['summary'] = [
+                    'topic' => $report['details']['topic'] ?? 'Bilinmiyor',
+                    'start_time' => $report['details']['start_time'] ?? null,
+                    'end_time' => $report['details']['end_time'] ?? null,
+                    'duration' => $report['details']['duration'] ?? 0,
+                    'total_participants' => $report['total_participants'] ?? 0,
+                    'host' => $report['details']['host_email'] ?? 'Bilinmiyor'
+                ];
+            }
+            
+            writeLog("✅ Meeting report compiled successfully for: $meetingId", 'info');
+            
+            return [
+                'success' => true,
+                'message' => 'Toplantı raporu alındı',
+                'data' => $report
+            ];
+            
+        } catch (Exception $e) {
+            writeLog("❌ Error getting meeting report: " . $e->getMessage(), 'error');
+            return [
+                'success' => false,
+                'message' => 'Toplantı raporu alınırken hata oluştu: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Kayıt indirme URL'si al
+     * 
+     * @param string $meetingId Toplantı ID'si
+     * @param string $recordingId Kayıt ID'si
+     * @return array İndirme URL'si
+     */
+    public function getRecordingDownloadUrl($meetingId, $recordingId = null) {
+        try {
+            writeLog("🔗 Getting recording download URL for meeting: $meetingId", 'info');
+            
+            $response = $this->makeRequest("/meetings/$meetingId/recordings");
+            
+            if (!$response['success']) {
+                return [
+                    'success' => false,
+                    'message' => 'Kayıt bilgileri alınamadı'
+                ];
+            }
+            
+            $recordings = $response['data'];
+            $downloadUrls = [];
+            
+            if (isset($recordings['recording_files']) && !empty($recordings['recording_files'])) {
+                foreach ($recordings['recording_files'] as $file) {
+                    // Belirli bir kayıt istendi mi?
+                    if ($recordingId && $file['id'] !== $recordingId) {
+                        continue;
+                    }
+                    
+                    $downloadUrls[] = [
+                        'id' => $file['id'],
+                        'file_type' => $file['file_type'] ?? 'unknown',
+                        'file_size' => $file['file_size'] ?? 0,
+                        'download_url' => $file['download_url'] ?? null,
+                        'play_url' => $file['play_url'] ?? null,
+                        'recording_start' => $file['recording_start'] ?? null,
+                        'recording_end' => $file['recording_end'] ?? null,
+                        'status' => $file['status'] ?? 'unknown'
+                    ];
+                }
+            }
+            
+            writeLog("✅ Found " . count($downloadUrls) . " recording files", 'info');
+            
+            return [
+                'success' => true,
+                'message' => 'Kayıt URL\'leri alındı',
+                'data' => [
+                    'meeting_id' => $meetingId,
+                    'share_url' => $recordings['share_url'] ?? null,
+                    'files' => $downloadUrls
+                ]
+            ];
+            
+        } catch (Exception $e) {
+            writeLog("❌ Error getting recording download URL: " . $e->getMessage(), 'error');
+            return [
+                'success' => false,
+                'message' => 'Kayıt URL\'si alınırken hata oluştu: ' . $e->getMessage()
+            ];
         }
     }
     

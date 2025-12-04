@@ -35,7 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 'bulk_approve':
-                $result = bulkApproveMeetings($_POST['meeting_ids'] ?? []);
+                $bulkCustomSettings = extractCustomZoomSettings($_POST);
+                $result = bulkApproveMeetings(
+                    $_POST['meeting_ids'] ?? [], 
+                    $_POST['bulk_zoom_account_id'] ?? null,
+                    $bulkCustomSettings
+                );
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
@@ -56,29 +61,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Toplantıları listele
 $filter = $_GET['filter'] ?? 'pending';
+$sort = $_GET['sort'] ?? 'smart'; // smart, date_asc, date_desc, created_desc
 $page = max(1, $_GET['page'] ?? 1);
 $limit = 20;
 $offset = ($page - 1) * $limit;
 
+// Tarih değişkenleri
+$today = date('Y-m-d');
+$weekStart = date('Y-m-d', strtotime('monday this week'));
+$weekEnd = date('Y-m-d', strtotime('sunday this week'));
+$monthStart = date('Y-m-01');
+$monthEnd = date('Y-m-t');
+
 try {
-    // Debug: First check if meetings table has any data
-    $debugStmt = $pdo->query("SELECT COUNT(*) as total_meetings FROM meetings");
-    $debugResult = $debugStmt->fetch();
-    writeLog("Admin meetings debug - Total meetings in DB: " . $debugResult['total_meetings'], 'info');
-    
-    // Debug: Check if users table has data
-    $debugUsersStmt = $pdo->query("SELECT COUNT(*) as total_users FROM users");
-    $debugUsersResult = $debugUsersStmt->fetch();
-    writeLog("Admin meetings debug - Total users in DB: " . $debugUsersResult['total_users'], 'info');
-    
     // Where clause for filter
     $whereClause = '';
+    $isSQLite = defined('DB_TYPE') && DB_TYPE === 'sqlite';
+    $nowFunc = $isSQLite ? "DATE('now')" : "CURDATE()";
+    
     switch ($filter) {
         case 'pending':
             $whereClause = "WHERE m.status = 'pending'";
             break;
         case 'approved':
             $whereClause = "WHERE m.status = 'approved'";
+            break;
+        case 'approved_upcoming':
+            $whereClause = "WHERE m.status = 'approved' AND m.date >= $nowFunc";
+            break;
+        case 'approved_past':
+            $whereClause = "WHERE m.status = 'approved' AND m.date < $nowFunc";
             break;
         case 'rejected':
             $whereClause = "WHERE m.status = 'rejected'";
@@ -87,18 +99,16 @@ try {
             $whereClause = "WHERE m.status = 'cancelled'";
             break;
         case 'today':
-            if (defined('DB_TYPE') && DB_TYPE === 'sqlite') {
-                $whereClause = "WHERE DATE(m.date) = DATE('now') AND m.status = 'approved'";
-            } else {
-                $whereClause = "WHERE DATE(m.date) = CURDATE() AND m.status = 'approved'";
-            }
+            $whereClause = "WHERE DATE(m.date) = $nowFunc AND m.status = 'approved'";
+            break;
+        case 'this_week':
+            $whereClause = "WHERE m.date BETWEEN '$weekStart' AND '$weekEnd' AND m.status IN ('approved', 'pending')";
+            break;
+        case 'this_month':
+            $whereClause = "WHERE m.date BETWEEN '$monthStart' AND '$monthEnd' AND m.status IN ('approved', 'pending')";
             break;
         case 'upcoming':
-            if (defined('DB_TYPE') && DB_TYPE === 'sqlite') {
-                $whereClause = "WHERE m.date > DATE('now') AND m.status = 'approved'";
-            } else {
-                $whereClause = "WHERE m.date > CURDATE() AND m.status = 'approved'";
-            }
+            $whereClause = "WHERE m.date > $nowFunc AND m.status = 'approved'";
             break;
         case 'all':
             $whereClause = '';
@@ -106,6 +116,32 @@ try {
         default:
             $whereClause = '';
     }
+    
+    // Sıralama mantığı
+    $orderClause = match($sort) {
+        'date_asc' => "m.date ASC, m.start_time ASC",
+        'date_desc' => "m.date DESC, m.start_time DESC",
+        'created_desc' => "m.created_at DESC",
+        'created_asc' => "m.created_at ASC",
+        default => // smart sorting
+            "CASE 
+                WHEN m.status = 'pending' THEN 0 
+                WHEN m.status = 'approved' AND m.date >= $nowFunc THEN 1
+                WHEN m.status = 'approved' AND m.date < $nowFunc THEN 3
+                ELSE 2 
+            END,
+            CASE 
+                WHEN m.status = 'pending' THEN m.date 
+                WHEN m.status = 'approved' AND m.date >= $nowFunc THEN m.date
+                ELSE NULL
+            END ASC,
+            CASE 
+                WHEN m.status IN ('rejected', 'cancelled') OR (m.status = 'approved' AND m.date < $nowFunc) 
+                THEN m.date 
+                ELSE NULL 
+            END DESC,
+            m.start_time ASC"
+    };
     
     // Build the main query
     $mainQuery = "
@@ -118,20 +154,13 @@ try {
         LEFT JOIN departments d ON m.department_id = d.id
         LEFT JOIN zoom_accounts za ON m.zoom_account_id = za.id
         $whereClause
-        ORDER BY
-            CASE WHEN m.status = 'pending' THEN 0 ELSE 1 END,
-            m.date ASC, m.start_time ASC
+        ORDER BY $orderClause
         LIMIT $limit OFFSET $offset
     ";
-    
-    writeLog("Admin meetings debug - Query: " . $mainQuery, 'info');
-    writeLog("Admin meetings debug - Filter: $filter, Where: $whereClause", 'info');
     
     $stmt = $pdo->prepare($mainQuery);
     $stmt->execute();
     $meetings = $stmt->fetchAll();
-    
-    writeLog("Admin meetings debug - Found " . count($meetings) . " meetings", 'info');
     
     // Total count for pagination
     $countQuery = "
@@ -145,8 +174,6 @@ try {
     $countStmt->execute();
     $totalCount = $countStmt->fetchColumn();
     $totalPages = ceil($totalCount / $limit);
-    
-    writeLog("Admin meetings debug - Total count: $totalCount", 'info');
     
     // Zoom hesapları
     $stmt = $pdo->query("SELECT * FROM zoom_accounts WHERE status = 'active' ORDER BY email");
@@ -199,8 +226,6 @@ try {
     
     $statsStmt = $pdo->query($statsQuery);
     $stats = $statsStmt->fetch();
-    
-    writeLog("Admin meetings debug - Stats: " . json_encode($stats), 'info');
     
 } catch (Exception $e) {
     writeLog("Meeting approvals page error: " . $e->getMessage(), 'error');
@@ -450,35 +475,37 @@ function rejectMeeting($meetingId, $reason = '') {
     }
 }
 
-function bulkApproveMeetings($meetingIds) {
+function bulkApproveMeetings($meetingIds, $zoomAccountId = null, $customSettings = []) {
     global $pdo;
     
     if (empty($meetingIds)) {
         return ['success' => false, 'message' => 'Hiç toplantı seçilmedi.'];
     }
     
-    try {
-        $placeholders = str_repeat('?,', count($meetingIds) - 1) . '?';
-        $stmt = $pdo->prepare("
-            UPDATE meetings 
-            SET status = 'approved', 
-                approved_at = NOW(),
-                approved_by = ?
-            WHERE id IN ($placeholders) AND status = 'pending'
-        ");
-        
-        $params = array_merge([$_SESSION['user_id']], $meetingIds);
-        $result = $stmt->execute($params);
-        
-        if ($result) {
-            $approvedCount = $stmt->rowCount();
-            writeLog("Bulk approved $approvedCount meetings", 'info');
-            return ['success' => true, 'message' => "$approvedCount toplantı onaylandı."];
+    if (empty($zoomAccountId)) {
+        return ['success' => false, 'message' => 'Zoom hesabı seçimi zorunludur.'];
+    }
+    
+    $successCount = 0;
+    $failCount = 0;
+    $errors = [];
+    
+    foreach ($meetingIds as $meetingId) {
+        $result = approveMeeting($meetingId, $zoomAccountId, $customSettings);
+        if ($result['success']) {
+            $successCount++;
+        } else {
+            $failCount++;
+            $errors[] = "Toplantı #$meetingId: " . $result['message'];
         }
-        
-    } catch (Exception $e) {
-        writeLog("Bulk approve error: " . $e->getMessage(), 'error');
-        return ['success' => false, 'message' => 'Toplu onay sırasında hata oluştu.'];
+    }
+    
+    if ($successCount > 0 && $failCount == 0) {
+        return ['success' => true, 'message' => "$successCount toplantı başarıyla onaylandı."];
+    } elseif ($successCount > 0 && $failCount > 0) {
+        return ['success' => true, 'message' => "$successCount toplantı onaylandı, $failCount başarısız."];
+    } else {
+        return ['success' => false, 'message' => 'Hiçbir toplantı onaylanamadı. ' . implode('; ', array_slice($errors, 0, 3))];
     }
 }
 
@@ -754,28 +781,103 @@ include '../includes/sidebar.php';
             </div>
         </div>
 
-        <!-- Filter Tabs -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex flex-wrap gap-2">
-                    <a href="?filter=pending" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $filter === 'pending' ? 'bg-orange-100 text-orange-700' : 'text-gray-600 hover:bg-gray-100'; ?>">
-                        Bekleyen (<?php echo $stats['pending']; ?>)
+        <!-- Filter Tabs - Modern Design -->
+        <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+            <!-- Durum Filtreleri -->
+            <div class="px-6 py-5">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+                        <i class="fas fa-filter text-white text-xs"></i>
+                    </div>
+                    <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Durum</h4>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="?filter=pending&sort=<?php echo $sort; ?>" 
+                       class="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo $filter === 'pending' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-200' : 'bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-600 border border-gray-200 hover:border-orange-200 hover:shadow-md'; ?>">
+                        <i class="fas fa-hourglass-half <?php echo $filter === 'pending' ? '' : 'text-orange-400'; ?>"></i>
+                        <span>Bekleyen</span>
+                        <span class="<?php echo $filter === 'pending' ? 'bg-white/20' : 'bg-orange-100 text-orange-600'; ?> px-2 py-0.5 rounded-full text-xs font-bold"><?php echo $stats['pending']; ?></span>
                     </a>
-                    <a href="?filter=approved" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $filter === 'approved' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'; ?>">
-                        Onaylı (<?php echo $stats['approved']; ?>)
+                    <a href="?filter=approved_upcoming&sort=<?php echo $sort; ?>" 
+                       class="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo $filter === 'approved_upcoming' ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-200' : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-600 border border-gray-200 hover:border-green-200 hover:shadow-md'; ?>">
+                        <i class="fas fa-check-circle <?php echo $filter === 'approved_upcoming' ? '' : 'text-green-400'; ?>"></i>
+                        <span>Onaylı (Gelecek)</span>
                     </a>
-                    <a href="?filter=rejected" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $filter === 'rejected' ? 'bg-red-100 text-red-700' : 'text-gray-600 hover:bg-gray-100'; ?>">
-                        Reddedilen (<?php echo $stats['rejected']; ?>)
+                    <a href="?filter=approved_past&sort=<?php echo $sort; ?>" 
+                       class="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo $filter === 'approved_past' ? 'bg-gradient-to-r from-slate-500 to-gray-500 text-white shadow-lg shadow-gray-300' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 hover:shadow-md'; ?>">
+                        <i class="fas fa-history <?php echo $filter === 'approved_past' ? '' : 'text-gray-400'; ?>"></i>
+                        <span>Onaylı (Geçmiş)</span>
                     </a>
-                    <a href="?filter=today" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $filter === 'today' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'; ?>">
-                        Bugün (<?php echo $stats['today']; ?>)
+                    <a href="?filter=rejected&sort=<?php echo $sort; ?>" 
+                       class="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo $filter === 'rejected' ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-200' : 'bg-white text-gray-600 hover:bg-red-50 hover:text-red-600 border border-gray-200 hover:border-red-200 hover:shadow-md'; ?>">
+                        <i class="fas fa-times-circle <?php echo $filter === 'rejected' ? '' : 'text-red-400'; ?>"></i>
+                        <span>Reddedilen</span>
+                        <span class="<?php echo $filter === 'rejected' ? 'bg-white/20' : 'bg-red-100 text-red-600'; ?> px-2 py-0.5 rounded-full text-xs font-bold"><?php echo $stats['rejected']; ?></span>
                     </a>
-                    <a href="?filter=upcoming" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $filter === 'upcoming' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'; ?>">
-                        Yaklaşan
+                    <a href="?filter=cancelled&sort=<?php echo $sort; ?>" 
+                       class="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo $filter === 'cancelled' ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-lg shadow-gray-300' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 hover:shadow-md'; ?>">
+                        <i class="fas fa-ban <?php echo $filter === 'cancelled' ? '' : 'text-gray-400'; ?>"></i>
+                        <span>İptal</span>
                     </a>
-                    <a href="?filter=all" class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $filter === 'all' ? 'bg-gray-100 text-gray-700' : 'text-gray-600 hover:bg-gray-100'; ?>">
-                        Tümü (<?php echo $stats['total']; ?>)
-                    </a>
+                </div>
+            </div>
+            
+            <!-- Tarih & Sıralama -->
+            <div class="px-6 py-5 bg-white/50 border-t border-gray-100">
+                <div class="flex flex-wrap items-center gap-6">
+                    <!-- Tarih Filtreleri -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-purple-500">
+                            <i class="fas fa-calendar text-white text-xs"></i>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="?filter=today&sort=<?php echo $sort; ?>" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $filter === 'today' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-600'; ?>">
+                                <i class="fas fa-sun mr-1.5 text-xs"></i>Bugün
+                                <?php if($stats['today'] > 0): ?><span class="ml-1 text-xs opacity-75">(<?php echo $stats['today']; ?>)</span><?php endif; ?>
+                            </a>
+                            <a href="?filter=this_week&sort=<?php echo $sort; ?>" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $filter === 'this_week' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-500 hover:bg-indigo-50 hover:text-indigo-600'; ?>">
+                                <i class="fas fa-calendar-week mr-1.5 text-xs"></i>Bu Hafta
+                            </a>
+                            <a href="?filter=this_month&sort=<?php echo $sort; ?>" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $filter === 'this_month' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-600'; ?>">
+                                <i class="fas fa-calendar-alt mr-1.5 text-xs"></i>Bu Ay
+                            </a>
+                            <a href="?filter=all&sort=<?php echo $sort; ?>" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $filter === 'all' ? 'bg-gray-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'; ?>">
+                                <i class="fas fa-layer-group mr-1.5 text-xs"></i>Tümü
+                                <span class="ml-1 text-xs opacity-75">(<?php echo $stats['total']; ?>)</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="hidden md:block w-px h-8 bg-gray-200"></div>
+                    
+                    <!-- Sıralama -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500">
+                            <i class="fas fa-sort text-white text-xs"></i>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="?filter=<?php echo $filter; ?>&sort=smart" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $sort === 'smart' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md' : 'text-gray-500 hover:bg-cyan-50 hover:text-cyan-600'; ?>">
+                                <i class="fas fa-wand-magic-sparkles mr-1.5 text-xs"></i>Akıllı
+                            </a>
+                            <a href="?filter=<?php echo $filter; ?>&sort=date_desc" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $sort === 'date_desc' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md' : 'text-gray-500 hover:bg-cyan-50 hover:text-cyan-600'; ?>">
+                                <i class="fas fa-arrow-down-wide-short mr-1.5 text-xs"></i>Yeni→Eski
+                            </a>
+                            <a href="?filter=<?php echo $filter; ?>&sort=date_asc" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $sort === 'date_asc' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md' : 'text-gray-500 hover:bg-cyan-50 hover:text-cyan-600'; ?>">
+                                <i class="fas fa-arrow-up-wide-short mr-1.5 text-xs"></i>Eski→Yeni
+                            </a>
+                            <a href="?filter=<?php echo $filter; ?>&sort=created_desc" 
+                               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 <?php echo $sort === 'created_desc' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md' : 'text-gray-500 hover:bg-cyan-50 hover:text-cyan-600'; ?>">
+                                <i class="fas fa-clock-rotate-left mr-1.5 text-xs"></i>Son Eklenen
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -787,9 +889,14 @@ include '../includes/sidebar.php';
                     <?php 
                     $filterTitles = [
                         'pending' => 'Bekleyen Toplantılar',
-                        'approved' => 'Onaylı Toplantılar',
+                        'approved' => 'Tüm Onaylı Toplantılar',
+                        'approved_upcoming' => 'Onaylı Gelecek Toplantılar',
+                        'approved_past' => 'Onaylı Geçmiş Toplantılar',
                         'rejected' => 'Reddedilen Toplantılar',
+                        'cancelled' => 'İptal Edilen Toplantılar',
                         'today' => 'Bugünkü Toplantılar',
+                        'this_week' => 'Bu Haftaki Toplantılar',
+                        'this_month' => 'Bu Ayki Toplantılar',
                         'upcoming' => 'Yaklaşan Toplantılar',
                         'all' => 'Tüm Toplantılar'
                     ];
@@ -941,14 +1048,14 @@ include '../includes/sidebar.php';
                         </div>
                         <div class="flex space-x-2">
                             <?php if ($page > 1): ?>
-                                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page - 1; ?>" 
+                                <a href="?filter=<?php echo $filter; ?>&sort=<?php echo $sort; ?>&page=<?php echo $page - 1; ?>" 
                                    class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
                                     Önceki
                                 </a>
                             <?php endif; ?>
                             
                             <?php if ($page < $totalPages): ?>
-                                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page + 1; ?>" 
+                                <a href="?filter=<?php echo $filter; ?>&sort=<?php echo $sort; ?>&page=<?php echo $page + 1; ?>" 
                                    class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
                                     Sonraki
                                 </a>
@@ -1191,11 +1298,14 @@ include '../includes/sidebar.php';
 </div>
 
 <!-- Bulk Approval Modal -->
-<div id="bulkApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100000]">
+<div id="bulkApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100000] overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full my-8">
             <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Toplu Onay</h3>
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-tasks mr-2 text-green-600"></i>Toplu Onay Ayarları
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">Seçili tüm toplantılar aşağıdaki ayarlarla onaylanacak</p>
             </div>
             
             <form method="POST" class="p-6">
@@ -1203,13 +1313,97 @@ include '../includes/sidebar.php';
                 <input type="hidden" name="action" value="bulk_approve">
                 <div id="selectedMeetingsContainer"></div>
                 
-                <p class="text-sm text-gray-600 mb-6">
-                    Seçili toplantılar onaylanacak. Bu işlem geri alınamaz.
-                </p>
+                <!-- Seçili Toplantı Sayısı -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-600 mr-3"></i>
+                        <span class="text-blue-800">
+                            <strong id="bulkMeetingCount">0</strong> toplantı seçildi
+                        </span>
+                    </div>
+                </div>
                 
-                <div class="flex justify-end space-x-3">
+                <!-- Zoom Hesabı Seçimi -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Zoom Hesabı <span class="text-red-500">*</span>
+                    </label>
+                    <select name="bulk_zoom_account_id" class="form-select" required>
+                        <option value="">Zoom hesabı seçin...</option>
+                        <?php foreach ($zoomAccounts as $account): ?>
+                            <option value="<?php echo $account['id']; ?>">
+                                <?php echo htmlspecialchars($account['email']); ?>
+                                <?php if ($account['name']): ?> - <?php echo htmlspecialchars($account['name']); ?><?php endif; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="text-sm text-gray-500 mt-1">Tüm toplantılar bu hesap üzerinden oluşturulacak</p>
+                </div>
+
+                <!-- Zoom Ayarları -->
+                <div class="mb-6 border-t border-gray-200 pt-6">
+                    <h4 class="text-md font-semibold text-gray-900 mb-4">
+                        <i class="fab fa-zoom mr-2 text-blue-600"></i>
+                        Zoom Ayarları (Tüm Toplantılar İçin)
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Katılım Kontrolü -->
+                        <div class="space-y-3">
+                            <h5 class="text-sm font-medium text-gray-700">🚪 Katılım Kontrolü</h5>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" name="custom_join_before_host" id="bulk_join_before_host" class="form-checkbox" 
+                                       <?php echo $zoomDefaults['zoom_join_before_host'] == '1' ? 'checked' : ''; ?>>
+                                <label for="bulk_join_before_host" class="ml-2 text-sm text-gray-700">Host'tan önce katılım</label>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" name="custom_waiting_room" id="bulk_waiting_room" class="form-checkbox"
+                                       <?php echo $zoomDefaults['zoom_waiting_room'] == '1' ? 'checked' : ''; ?>>
+                                <label for="bulk_waiting_room" class="ml-2 text-sm text-gray-700">Bekleme Odası</label>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" name="custom_mute_upon_entry" id="bulk_mute_upon_entry" class="form-checkbox"
+                                       <?php echo $zoomDefaults['zoom_mute_upon_entry'] == '1' ? 'checked' : ''; ?>>
+                                <label for="bulk_mute_upon_entry" class="ml-2 text-sm text-gray-700">Katılımda Sessiz</label>
+                            </div>
+                        </div>
+
+                        <!-- Video & Kayıt -->
+                        <div class="space-y-3">
+                            <h5 class="text-sm font-medium text-gray-700">📺 Video & Kayıt</h5>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" name="custom_host_video" id="bulk_host_video" class="form-checkbox"
+                                       <?php echo $zoomDefaults['zoom_host_video'] == '1' ? 'checked' : ''; ?>>
+                                <label for="bulk_host_video" class="ml-2 text-sm text-gray-700">Host Video Açık</label>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" name="custom_participant_video" id="bulk_participant_video" class="form-checkbox"
+                                       <?php echo $zoomDefaults['zoom_participant_video'] == '1' ? 'checked' : ''; ?>>
+                                <label for="bulk_participant_video" class="ml-2 text-sm text-gray-700">Katılımcı Video Açık</label>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Otomatik Kayıt</label>
+                                <select name="custom_auto_recording" class="form-select text-sm">
+                                    <option value="none" <?php echo $zoomDefaults['zoom_auto_recording'] == 'none' ? 'selected' : ''; ?>>Kayıt Yok</option>
+                                    <option value="local" <?php echo $zoomDefaults['zoom_auto_recording'] == 'local' ? 'selected' : ''; ?>>Yerel Kayıt</option>
+                                    <option value="cloud" <?php echo $zoomDefaults['zoom_auto_recording'] == 'cloud' ? 'selected' : ''; ?>>Cloud Kayıt</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                     <button type="button" onclick="closeBulkApprovalModal()" class="btn-secondary">İptal</button>
-                    <button type="submit" class="btn-primary bg-green-600 hover:bg-green-700">Toplu Onayla</button>
+                    <button type="submit" class="btn-primary bg-green-600 hover:bg-green-700">
+                        <i class="fas fa-check-double mr-2"></i>Toplu Onayla
+                    </button>
                 </div>
             </form>
         </div>
@@ -1382,7 +1576,22 @@ include '../includes/sidebar.php';
             container.appendChild(input);
         });
         
+        // Seçili toplantı sayısını güncelle
+        document.getElementById('bulkMeetingCount').textContent = checkedBoxes.length;
+        
         document.getElementById('bulkApprovalModal').classList.remove('hidden');
+        
+        // Bulk modal için çelişki yönetimi
+        const bulkJoin = document.getElementById('bulk_join_before_host');
+        const bulkWait = document.getElementById('bulk_waiting_room');
+        if (bulkJoin && bulkWait) {
+            bulkJoin.addEventListener('change', function() {
+                if (this.checked) bulkWait.checked = false;
+            });
+            bulkWait.addEventListener('change', function() {
+                if (this.checked) bulkJoin.checked = false;
+            });
+        }
     }
     
     function closeBulkApprovalModal() {

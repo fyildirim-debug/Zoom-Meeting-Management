@@ -542,12 +542,13 @@ include 'includes/sidebar.php';
                                 <div class="flex items-center space-x-2">
                                     <?php if ($meeting['meeting_link'] && $meeting['status'] === 'approved'): ?>
                                         <?php if ($meeting['user_id'] == $currentUser['id']): ?>
-                                            <!-- Kendi toplantımız - Başlat -->
-                                            <a href="<?php echo htmlspecialchars($meeting['meeting_link']); ?>"
-                                               target="_blank"
-                                               class="btn-primary px-3 py-2 text-sm">
-                                                <i class="fas fa-play mr-1"></i>Başlat
-                                            </a>
+                                            <!-- Kendi toplantımız - Başlat (API ile) -->
+                                            <button onclick="startMeetingAsHost(<?php echo $meeting['id']; ?>, this)"
+                                                    class="btn-primary px-3 py-2 text-sm inline-flex items-center">
+                                                <i class="fas fa-play mr-1 start-icon"></i>
+                                                <i class="fas fa-spinner fa-spin mr-1 loading-icon hidden"></i>
+                                                <span class="btn-text">Başlat</span>
+                                            </button>
                                         <?php else: ?>
                                             <!-- Başkasının toplantısı - Katıl -->
                                             <a href="<?php echo htmlspecialchars($meeting['meeting_link']); ?>"
@@ -642,6 +643,84 @@ include 'includes/sidebar.php';
 $additionalScripts = '
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Kullanıcı bilgileri
+window.APP_CONFIG = {
+    user_id: ' . (int)$currentUser['id'] . ',
+    user_name: "' . htmlspecialchars($currentUser['name'] . ' ' . $currentUser['surname'], ENT_QUOTES) . '",
+    csrf_token: "' . ($_SESSION['csrf_token'] ?? '') . '"
+};
+
+// Zoom URL\'ye kullanıcı adı ekle
+function addUserNameToZoomUrl(url) {
+    if (!url) return url;
+    try {
+        var urlObj = new URL(url);
+        urlObj.searchParams.set("uname", window.APP_CONFIG.user_name);
+        return urlObj.toString();
+    } catch (e) {
+        return url + (url.includes("?") ? "&" : "?") + "uname=" + encodeURIComponent(window.APP_CONFIG.user_name);
+    }
+}
+
+// Toplantıyı başlat (API ile)
+async function startMeetingAsHost(meetingId, buttonElement) {
+    console.log("🚀 Starting meeting as host:", meetingId);
+    
+    const startIcon = buttonElement.querySelector(".start-icon");
+    const loadingIcon = buttonElement.querySelector(".loading-icon");
+    const btnText = buttonElement.querySelector(".btn-text");
+    
+    buttonElement.disabled = true;
+    if (startIcon) startIcon.classList.add("hidden");
+    if (loadingIcon) loadingIcon.classList.remove("hidden");
+    if (btnText) btnText.textContent = "Hazırlanıyor...";
+    
+    try {
+        const response = await fetch("api/refresh-start-url.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ meeting_id: meetingId })
+        });
+        
+        const data = await response.json();
+        console.log("📦 API Response:", data);
+        
+        if (data.success && data.data && data.data.start_url) {
+            if (btnText) btnText.textContent = "Açılıyor...";
+            var startUrl = addUserNameToZoomUrl(data.data.start_url);
+            window.open(startUrl, "_blank");
+            showNotification("Toplantı yeni sekmede açılıyor...", "success");
+            setTimeout(() => resetStartButton(buttonElement), 2000);
+        } else {
+            showNotification(data.message || "Güncel URL alınamadı", "error");
+            resetStartButton(buttonElement);
+        }
+    } catch (error) {
+        console.error("❌ Start meeting error:", error);
+        showNotification("Bağlantı hatası: " + error.message, "error");
+        resetStartButton(buttonElement);
+    }
+}
+
+function resetStartButton(buttonElement) {
+    const startIcon = buttonElement.querySelector(".start-icon");
+    const loadingIcon = buttonElement.querySelector(".loading-icon");
+    const btnText = buttonElement.querySelector(".btn-text");
+    
+    buttonElement.disabled = false;
+    if (startIcon) startIcon.classList.remove("hidden");
+    if (loadingIcon) loadingIcon.classList.add("hidden");
+    if (btnText) btnText.textContent = "Başlat";
+}
+
+function showNotification(message, type) {
+    if (typeof showToast === "function") {
+        showToast(message, type);
+    } else {
+        alert(message);
+    }
+}
+
 // Chart.js konfigürasyonu
 Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--text-secondary");
 Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue("--border-color");

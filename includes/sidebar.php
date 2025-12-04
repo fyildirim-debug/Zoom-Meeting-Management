@@ -49,6 +49,18 @@ $adminMenuItems = [
         'icon' => 'fas fa-chart-bar',
         'url' => $adminPrefix . 'reports.php',
         'badge' => null
+    ],
+    [
+        'title' => 'Toplantı Kayıtları',
+        'icon' => 'fas fa-video',
+        'url' => $adminPrefix . 'recordings.php',
+        'badge' => null
+    ],
+    [
+        'title' => 'Sistem Kapatma',
+        'icon' => 'fas fa-calendar-times',
+        'url' => $adminPrefix . 'system-closures.php',
+        'badge' => null
     ]
 ];
 
@@ -76,6 +88,12 @@ $userMenuItems = [
         'title' => 'Takvim Görünümü',
         'icon' => 'fas fa-calendar-alt',
         'url' => $userPrefix . 'calendar.php',
+        'badge' => null
+    ],
+    [
+        'title' => 'Kayıtlarım',
+        'icon' => 'fas fa-film',
+        'url' => $userPrefix . 'my-recordings.php',
         'badge' => null
     ],
     [
@@ -329,6 +347,26 @@ function isActiveMenu($url) {
         margin-top: 0.25rem;
     }
     
+    /* Version Info */
+    .sidebar-version {
+        padding: 0.5rem 1rem;
+        text-align: center;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+    }
+    
+    .version-text {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        opacity: 0.7;
+    }
+    
+    .version-text:hover {
+        opacity: 1;
+    }
+    
     /* Mobile Styles */
     @media (max-width: 768px) {
         .sidebar {
@@ -452,6 +490,11 @@ function isActiveMenu($url) {
                 <div class="stat-label">Bekleyen</div>
             </div>
         </div>
+    </div>
+    
+    <!-- Version Info -->
+    <div class="sidebar-version">
+        <span class="version-text">v<?php echo defined('APP_VERSION') ? APP_VERSION : '1.0.0'; ?></span>
     </div>
 </aside>
 

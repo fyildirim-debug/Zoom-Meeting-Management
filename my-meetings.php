@@ -89,24 +89,12 @@ switch ($dateFilter) {
 $whereClause = implode(' AND ', $whereConditions);
 
 try {
-    // DEBUG: Veritabanı veri kontrolü
-    $debugStmt = $pdo->prepare("SELECT COUNT(*) as total, department_id FROM meetings GROUP BY department_id");
-    $debugStmt->execute();
-    $debugData = $debugStmt->fetchAll();
-    writeLog("DEBUG - All meetings by department: " . json_encode($debugData), 'info');
-    writeLog("DEBUG - Current user department_id: " . $currentUser['department_id'], 'info');
-    writeLog("DEBUG - View mode: $viewMode, Status: $status", 'info');
-    writeLog("DEBUG - Where conditions: " . json_encode($whereConditions), 'info');
-    writeLog("DEBUG - Params: " . json_encode($params), 'info');
-    
-    // Toplam kayıt sayısı - JOIN kullanmadığı için tüm alias'ları temizle
+    // Toplam kayıt sayısı
     $countWhereClause = str_replace(['m.department_id', 'm.date', 'm.status'], ['department_id', 'date', 'status'], $whereClause);
-    $countParams = $params; // params array'ini kopyala
+    $countParams = $params;
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM meetings WHERE {$countWhereClause}");
     $stmt->execute($countParams);
     $totalMeetings = $stmt->fetchColumn();
-    
-    writeLog("DEBUG - Total meetings found: $totalMeetings", 'info');
     
     // Sayfalama hesaplama
     $pagination = calculatePagination($totalMeetings, $perPage, $page);
@@ -514,18 +502,20 @@ include 'includes/sidebar.php';
                                                         <i class="fas fa-eye"></i>
                                                     </button>
 
-                                                    <?php if ($meeting['status'] === 'approved' && !$isPastMoreThanOneDay && $meeting['zoom_start_url'] && $meeting['user_id'] == $currentUser['id']): ?>
-                                                        <!-- Start Meeting (Admin) -->
-                                                        <a
-                                                            href="<?php echo htmlspecialchars($meeting['zoom_start_url']); ?>"
-                                                            target="_blank"
-                                                            class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-                                                            title="Toplantıyı Admin Olarak Başlat"
+                                                    <?php if ($meeting['status'] === 'approved' && !$isPastMoreThanOneDay && ($meeting['zoom_start_url'] || $meeting['zoom_meeting_id'] || $meeting['meeting_id']) && $meeting['user_id'] == $currentUser['id']): ?>
+                                                        <!-- Start Meeting (Host) - Güncel Token ile -->
+                                                        <button
+                                                            onclick="startMeetingAsHost(<?php echo $meeting['id']; ?>, this)"
+                                                            class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                                            title="Toplantıyı Yönetici Olarak Başlat"
+                                                            type="button"
                                                         >
-                                                            <i class="fas fa-crown mr-1"></i>Başlat
-                                                        </a>
-                                                    <?php elseif ($meeting['status'] === 'approved' && !$isPastMoreThanOneDay && $meeting['zoom_join_url'] && $meeting['user_id'] == $currentUser['id']): ?>
-                                                        <!-- Join Meeting (Participant) -->
+                                                            <i class="fas fa-crown mr-1 start-icon"></i>
+                                                            <i class="fas fa-spinner fa-spin mr-1 loading-icon hidden"></i>
+                                                            <span class="btn-text">Başlat</span>
+                                                        </button>
+                                                    <?php elseif ($meeting['status'] === 'approved' && !$isPastMoreThanOneDay && $meeting['zoom_join_url']): ?>
+                                                        <!-- Join Meeting (Participant) - Davetiye Linki -->
                                                         <a
                                                             href="<?php echo htmlspecialchars($meeting['zoom_join_url']); ?>"
                                                             target="_blank"
@@ -637,8 +627,22 @@ $additionalScripts = '
 // Global config for JavaScript
 window.APP_CONFIG = {
     user_id: ' . (int)$currentUser['id'] . ',
+    user_name: "' . htmlspecialchars($currentUser['name'] . ' ' . $currentUser['surname'], ENT_QUOTES) . '",
     csrf_token: "' . ($_SESSION['csrf_token'] ?? '') . '"
 };
+
+// Zoom URL\'ye kullanıcı adı ekle
+function addUserNameToZoomUrl(url) {
+    if (!url) return url;
+    try {
+        var urlObj = new URL(url);
+        urlObj.searchParams.set("uname", window.APP_CONFIG.user_name);
+        return urlObj.toString();
+    } catch (e) {
+        // URL parse edilemezse orijinali döndür
+        return url + (url.includes("?") ? "&" : "?") + "uname=" + encodeURIComponent(window.APP_CONFIG.user_name);
+    }
+}
 
 
 </script>';
@@ -647,6 +651,85 @@ include 'includes/footer.php';
 ?>
 
 <script>
+/**
+ * Toplantıyı Yönetici (Host) Olarak Başlat
+ * API'den güncel start URL alır ve yeni sekmede açar
+ * Bu sayede eski/geçersiz token sorunu çözülür
+ */
+async function startMeetingAsHost(meetingId, buttonElement) {
+    console.log('🚀 Starting meeting as host:', meetingId);
+    
+    // Buton durumunu güncelle
+    const startIcon = buttonElement.querySelector('.start-icon');
+    const loadingIcon = buttonElement.querySelector('.loading-icon');
+    const btnText = buttonElement.querySelector('.btn-text');
+    
+    buttonElement.disabled = true;
+    if (startIcon) startIcon.classList.add('hidden');
+    if (loadingIcon) loadingIcon.classList.remove('hidden');
+    if (btnText) btnText.textContent = 'Hazırlanıyor...';
+    
+    try {
+        // API'den güncel start URL al
+        const response = await fetch('api/refresh-start-url.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ meeting_id: meetingId })
+        });
+        
+        const data = await response.json();
+        console.log('📦 API Response:', data);
+        
+        if (data.success && data.data && data.data.start_url) {
+            // Güncel URL ile toplantıyı başlat
+            console.log('✅ Opening meeting with fresh URL');
+            if (btnText) btnText.textContent = 'Açılıyor...';
+            
+            // URL'ye kullanıcı adını ekle ve yeni sekmede aç
+            var startUrl = addUserNameToZoomUrl(data.data.start_url);
+            console.log('🔗 URL with user name:', startUrl);
+            window.open(startUrl, '_blank');
+            
+            // Başarı bildirimi
+            showNotification('Toplantı yeni sekmede açılıyor...', 'success');
+            
+            // Buton durumunu resetle
+            setTimeout(() => {
+                resetStartButton(buttonElement);
+            }, 2000);
+            
+        } else {
+            // Hata durumunda fallback - mevcut URL'yi dene
+            console.warn('⚠️ API failed, trying fallback');
+            showNotification(data.message || 'Güncel URL alınamadı, mevcut URL deneniyor...', 'warning');
+            
+            // Sayfayı yenile ve eski URL'yi kullanmayı dene
+            resetStartButton(buttonElement);
+        }
+        
+    } catch (error) {
+        console.error('❌ Start meeting error:', error);
+        showNotification('Bağlantı hatası: ' + error.message, 'error');
+        resetStartButton(buttonElement);
+    }
+}
+
+/**
+ * Başlat butonunu varsayılan durumuna döndür
+ */
+function resetStartButton(buttonElement) {
+    const startIcon = buttonElement.querySelector('.start-icon');
+    const loadingIcon = buttonElement.querySelector('.loading-icon');
+    const btnText = buttonElement.querySelector('.btn-text');
+    
+    buttonElement.disabled = false;
+    if (startIcon) startIcon.classList.remove('hidden');
+    if (loadingIcon) loadingIcon.classList.add('hidden');
+    if (btnText) btnText.textContent = 'Başlat';
+}
+
 // Modal işlemleri
 function openMeetingModal(meetingId) {
     var modal = document.getElementById("meeting-modal");
@@ -860,7 +943,8 @@ function generateMeetingDetails(meeting) {
         
         // Katıl butonu - Tüm kullanıcılar için (Normal participant)
         if (joinUrl) {
-            html += "<a href=\"" + joinUrl + "\" target=\"_blank\" " +
+            var joinUrlWithName = addUserNameToZoomUrl(joinUrl);
+            html += "<a href=\"" + joinUrlWithName + "\" target=\"_blank\" " +
                            "class=\"flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl\" " +
                        "title=\"Toplantıya Normal Katılımcı Olarak Katıl\">" +
                         "<i class=\"fas fa-video mr-2\"></i>Katıl" +
@@ -869,7 +953,8 @@ function generateMeetingDetails(meeting) {
         
         // Başlat butonu - Sadece toplantı sahibi için (Admin/Host yetkisi)
         if (meeting.zoom_start_url && meeting.user_id == window.APP_CONFIG.user_id) {
-            html += "<a href=\"" + meeting.zoom_start_url + "\" target=\"_blank\" " +
+            var startUrlWithName = addUserNameToZoomUrl(meeting.zoom_start_url);
+            html += "<a href=\"" + startUrlWithName + "\" target=\"_blank\" " +
                            "class=\"flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl\" " +
                        "title=\"Toplantıyı Admin Olarak Başlat\">" +
                         "<i class=\"fas fa-crown mr-2\"></i>Başlat (Admin)" +
@@ -878,23 +963,53 @@ function generateMeetingDetails(meeting) {
             
             html += "</div>";
         } else {
-            // Geçmiş toplantı uyarısı
+            // Geçmiş toplantı - Kayıt ve rapor bilgileri
             html += "<div class=\"bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 mt-4\">" +
-                        "<div class=\"flex items-center\">" +
-                            "<div class=\"w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mr-3\">" +
-                                "<i class=\"fas fa-clock text-white text-sm\"></i>" +
+                        "<div class=\"flex items-center justify-between\">" +
+                            "<div class=\"flex items-center\">" +
+                                "<div class=\"w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mr-3\">" +
+                                    "<i class=\"fas fa-clock text-white text-sm\"></i>" +
+                                "</div>" +
+                                "<div>" +
+                                    "<p class=\"text-sm font-semibold text-amber-800\">Geçmiş Toplantı</p>" +
+                                    "<p class=\"text-xs text-amber-700\">Bu toplantı tamamlandı.</p>" +
+                                "</div>" +
                             "</div>" +
-                            "<div>" +
-                                "<p class=\"text-sm font-semibold text-amber-800\">Geçmiş Toplantı</p>" +
-                                "<p class=\"text-xs text-amber-700\">Bu toplantı 1 günden fazla geçmişte olduğu için artık bağlanılamaz.</p>" +
-                            "</div>" +
+                            "<button onclick=\"loadMeetingRecordings(" + meeting.id + ", '" + (meeting.zoom_meeting_id || meeting.meeting_id || "") + "')\" " +
+                                   "class=\"inline-flex items-center px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors\">" +
+                                "<i class=\"fas fa-video mr-1.5\"></i>Kayıtları Gör" +
+                            "</button>" +
                         "</div>" +
                     "</div>";
+            
+            // Kayıt bilgileri container
+            html += "<div id=\"recordings-container-" + meeting.id + "\" class=\"hidden mt-4\"></div>";
         }
         
         html += "</div>";
         
         html += "</div></div>";
+    }
+    
+    // Geçmiş toplantılar için de kayıt bilgisi göster (approved değilse bile)
+    var meetingDateCheck = new Date(meeting.date);
+    var oneDayAgoCheck = new Date();
+    oneDayAgoCheck.setDate(oneDayAgoCheck.getDate() - 1);
+    var isPastMeeting = meetingDateCheck < oneDayAgoCheck;
+    
+    if (isPastMeeting && meeting.status !== "approved") {
+        html += "<div class=\"bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4\">" +
+                    "<div class=\"flex items-center justify-between\">" +
+                        "<div class=\"flex items-center\">" +
+                            "<i class=\"fas fa-history text-gray-400 mr-2\"></i>" +
+                            "<span class=\"text-sm text-gray-600\">Geçmiş Toplantı</span>" +
+                        "</div>" +
+                        "<button onclick=\"loadMeetingRecordings(" + meeting.id + ", '" + (meeting.zoom_meeting_id || meeting.meeting_id || "") + "')\" " +
+                               "class=\"inline-flex items-center px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded-lg hover:bg-gray-700 transition-colors\">" +
+                            "<i class=\"fas fa-video mr-1.5\"></i>Kayıtları Kontrol Et" +
+                        "</button>" +
+                    "</div>" +
+                "</div>";
     }
     
     if (meeting.status === "rejected" && meeting.rejection_reason) {
@@ -1258,18 +1373,139 @@ function legacySimpleCopy(text) {
     
     try {
         var success = document.execCommand('copy');
-        console.log('📋 Legacy simple result:', success);
-        
         if (success) {
             alert('Kopyalandı: ' + text.substring(0, 20) + '...');
         } else {
             alert('Kopyalama başarısız!');
         }
     } catch (e) {
-        console.error('❌ Legacy simple error:', e);
         alert('Kopyalama desteklenmiyor!');
     }
     
     document.body.removeChild(textarea);
+}
+
+/**
+ * Toplantı kayıtlarını yükle ve göster
+ */
+async function loadMeetingRecordings(localMeetingId, zoomMeetingId) {
+    console.log('📹 Loading recordings for meeting:', localMeetingId, zoomMeetingId);
+    
+    var container = document.getElementById('recordings-container-' + localMeetingId);
+    if (!container) {
+        console.error('Container not found for meeting:', localMeetingId);
+        return;
+    }
+    
+    // Toggle visibility
+    if (!container.classList.contains('hidden') && container.innerHTML !== '') {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    // Show loading
+    container.classList.remove('hidden');
+    container.innerHTML = '<div class="flex items-center justify-center py-4">' +
+                            '<i class="fas fa-spinner fa-spin text-purple-600 mr-2"></i>' +
+                            '<span class="text-gray-600">Kayıtlar yükleniyor...</span>' +
+                          '</div>';
+    
+    try {
+        // Kayıtları API'den çek
+        var response = await fetch('api/get-recordings.php?meeting_id=' + encodeURIComponent(zoomMeetingId));
+        var data = await response.json();
+        
+        if (data.success && data.recordings && data.recordings.length > 0) {
+            var html = '<div class="bg-purple-50 border border-purple-200 rounded-lg p-4">' +
+                        '<h5 class="text-sm font-semibold text-purple-800 mb-3 flex items-center">' +
+                            '<i class="fas fa-video mr-2"></i>Toplantı Kayıtları' +
+                        '</h5>' +
+                        '<div class="space-y-2">';
+            
+            data.recordings.forEach(function(recording) {
+                var fileSize = recording.file_size ? formatFileSize(recording.file_size) : '';
+                var duration = recording.recording_start ? formatDuration(recording.recording_start, recording.recording_end) : '';
+                
+                html += '<div class="bg-white p-3 rounded border border-purple-100 flex items-center justify-between">' +
+                            '<div class="flex items-center">' +
+                                '<i class="fas fa-file-video text-purple-500 mr-3"></i>' +
+                                '<div>' +
+                                    '<p class="text-sm font-medium text-gray-800">' + (recording.recording_type || 'Video') + '</p>' +
+                                    '<p class="text-xs text-gray-500">' + fileSize + (duration ? ' • ' + duration : '') + '</p>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="flex gap-2">';
+                
+                if (recording.play_url) {
+                    html += '<a href="' + recording.play_url + '" target="_blank" ' +
+                               'class="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">' +
+                                '<i class="fas fa-play mr-1"></i>İzle' +
+                            '</a>';
+                }
+                
+                if (recording.download_url) {
+                    html += '<a href="' + recording.download_url + '" target="_blank" ' +
+                               'class="inline-flex items-center px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">' +
+                                '<i class="fas fa-download mr-1"></i>İndir' +
+                            '</a>';
+                }
+                
+                html += '</div></div>';
+            });
+            
+            html += '</div></div>';
+            
+            // Toplantı raporu bilgileri
+            if (data.report) {
+                html += '<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-3">' +
+                            '<h5 class="text-sm font-semibold text-blue-800 mb-3 flex items-center">' +
+                                '<i class="fas fa-chart-bar mr-2"></i>Toplantı Raporu' +
+                            '</h5>' +
+                            '<div class="grid grid-cols-2 gap-3">' +
+                                '<div class="bg-white p-2 rounded text-center">' +
+                                    '<p class="text-lg font-bold text-blue-600">' + (data.report.participants_count || 0) + '</p>' +
+                                    '<p class="text-xs text-gray-500">Katılımcı</p>' +
+                                '</div>' +
+                                '<div class="bg-white p-2 rounded text-center">' +
+                                    '<p class="text-lg font-bold text-blue-600">' + (data.report.duration || 0) + ' dk</p>' +
+                                    '<p class="text-xs text-gray-500">Süre</p>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+            }
+            
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">' +
+                                    '<i class="fas fa-info-circle text-gray-400 text-2xl mb-2"></i>' +
+                                    '<p class="text-sm text-gray-600">Bu toplantı için kayıt bulunamadı.</p>' +
+                                    '<p class="text-xs text-gray-400 mt-1">Zoom Cloud Recording aktif olmayabilir.</p>' +
+                                  '</div>';
+        }
+    } catch (error) {
+        console.error('Error loading recordings:', error);
+        container.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">' +
+                                '<i class="fas fa-exclamation-circle text-red-400 text-2xl mb-2"></i>' +
+                                '<p class="text-sm text-red-600">Kayıtlar yüklenirken hata oluştu.</p>' +
+                              '</div>';
+    }
+}
+
+// Dosya boyutunu formatla
+function formatFileSize(bytes) {
+    if (!bytes) return '';
+    var sizes = ['B', 'KB', 'MB', 'GB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+}
+
+// Süreyi formatla
+function formatDuration(start, end) {
+    if (!start || !end) return '';
+    var startDate = new Date(start);
+    var endDate = new Date(end);
+    var diffMs = endDate - startDate;
+    var diffMins = Math.round(diffMs / 60000);
+    return diffMins + ' dakika';
 }
 </script>

@@ -1,0 +1,420 @@
+[2025-12-04 12:28:37] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 12:28:37] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 12:28:37] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 12:28:37] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 12:28:37] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 12:28:37] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 12:28:40] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 12:28:40] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 12:28:40] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 12:28:40] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 12:28:40] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 12:28:40] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 12:28:49] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 12:28:49] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 12:28:49] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 12:28:49] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 12:28:49] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 12:28:49] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 12:29:13] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'
+[2025-12-04 12:29:13] [info] [User:1] [IP:::1] ✅ Migration başarılı: 002_add_recording_fields
+[2025-12-04 12:29:13] [info] [User:1] [IP:::1] ✅ Migration başarılı: 003_add_meeting_indexes
+[2025-12-04 12:29:13] [info] [User:1] [IP:::1] 🔄 Otomatik migration: 002_add_recording_fields, 003_add_meeting_indexes
+[2025-12-04 12:29:13] [info] [User:1] [IP:::1]  Auto migrations executed on login: 002_add_recording_fields, 003_add_meeting_indexes
+[2025-12-04 13:21:29] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:21:29] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:21:29] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:21:29] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:21:29] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:21:29] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:21:31] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:21:31] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:21:31] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 13:21:31] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 13:21:31] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:21:31] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Total meetings in DB: 171
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Total users in DB: 19
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Query: 
+        SELECT m.*,
+               u.name as user_name, u.surname as user_surname, u.email as user_email,
+               d.name as department_name,
+               za.email as zoom_email, za.name as zoom_account_name
+        FROM meetings m
+        JOIN users u ON m.user_id = u.id
+        LEFT JOIN departments d ON m.department_id = d.id
+        LEFT JOIN zoom_accounts za ON m.zoom_account_id = za.id
+        WHERE m.status = 'pending'
+        ORDER BY
+            CASE WHEN m.status = 'pending' THEN 0 ELSE 1 END,
+            m.date ASC, m.start_time ASC
+        LIMIT 20 OFFSET 0
+    
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Filter: pending, Where: WHERE m.status = 'pending'
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Found 0 meetings
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Total count: 0
+[2025-12-04 13:21:43] [info] [User:1] [IP:::1] Admin meetings debug - Stats: {"total":171,"pending":0,"approved":144,"rejected":22,"today":1}
+[2025-12-04 13:22:13] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:22:13] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:22:13] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:22:13] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:22:13] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:22:13] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:22:19] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:22:19] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:22:19] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:22:19] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:22:19] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:22:19] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:22:22] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:22:22] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:22:22] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 13:22:22] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 13:22:22] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:22:22] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 13:22:48] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:22:48] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:22:48] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 13:22:48] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 13:22:48] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:22:48] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 13:34:42] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:34:42] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:34:42] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:34:42] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:34:42] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:34:42] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:34:44] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:34:44] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:34:44] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 13:34:44] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 13:34:44] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:34:44] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 13:37:38] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 93393570969
+[2025-12-04 13:37:38] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 93393570969
+[2025-12-04 13:37:38] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:37:39] [error] [User:1] [IP:::1] ❌ Error getting cloud recordings: Zoom API Error: Bu kayıt mevcut değil. (Code: 404)
+[2025-12-04 13:37:40] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 91588022026
+[2025-12-04 13:37:40] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 91588022026
+[2025-12-04 13:37:41] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:37:41] [info] [User:1] [IP:::1] ✅ Found recordings for meeting 91588022026
+[2025-12-04 13:37:41] [info] [User:1] [IP:::1] 📊 Getting meeting report for: 91588022026
+[2025-12-04 13:37:42] [info] [User:1] [IP:::1] ✅ Meeting details retrieved
+[2025-12-04 13:37:42] [info] [User:1] [IP:::1] ✅ Found 27 participants
+[2025-12-04 13:37:43] [info] [User:1] [IP:::1] ✅ Poll results retrieved
+[2025-12-04 13:37:44] [info] [User:1] [IP:::1] ✅ Q&A report retrieved
+[2025-12-04 13:37:44] [info] [User:1] [IP:::1] ✅ Meeting report compiled successfully for: 91588022026
+[2025-12-04 13:38:14] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:38:14] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:38:14] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:38:14] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:38:14] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:38:14] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:38:15] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:38:15] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:38:15] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 13:38:15] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 13:38:15] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:38:15] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 13:38:54] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 91588022026
+[2025-12-04 13:38:54] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 91588022026
+[2025-12-04 13:38:55] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:38:55] [info] [User:1] [IP:::1] ✅ Found recordings for meeting 91588022026
+[2025-12-04 13:38:55] [info] [User:1] [IP:::1] 📊 Getting meeting report for: 91588022026
+[2025-12-04 13:38:56] [info] [User:1] [IP:::1] ✅ Meeting details retrieved
+[2025-12-04 13:38:57] [info] [User:1] [IP:::1] ✅ Found 27 participants
+[2025-12-04 13:38:57] [info] [User:1] [IP:::1] ✅ Poll results retrieved
+[2025-12-04 13:38:58] [info] [User:1] [IP:::1] ✅ Q&A report retrieved
+[2025-12-04 13:38:58] [info] [User:1] [IP:::1] ✅ Meeting report compiled successfully for: 91588022026
+[2025-12-04 13:40:22] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:40:22] [info] [User:1] [IP:::1] Zoom connection test successful for account: VpV8nqkuTW-O2TM9vZVsxg
+[2025-12-04 13:40:22] [info] [User:1] [IP:::1] Zoom API Test - connection for account posta@furkanyildirim.com: SUCCESS
+[2025-12-04 13:40:53] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 96253863324
+[2025-12-04 13:40:53] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 96253863324
+[2025-12-04 13:40:54] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:40:54] [error] [User:1] [IP:::1] ❌ Error getting cloud recordings: Zoom API Error: Bu kayıt mevcut değil. (Code: 404)
+[2025-12-04 13:40:55] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 91874938453
+[2025-12-04 13:40:55] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 91874938453
+[2025-12-04 13:40:56] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:40:57] [error] [User:1] [IP:::1] ❌ Error getting cloud recordings: Zoom API Error: Bu kayıt mevcut değil. (Code: 404)
+[2025-12-04 13:41:08] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:41:08] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:41:08] [info] [User:1] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:41:08] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:41:08] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:41:08] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:41:09] [info] [User:1] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:41:09] [info] [User:1] [IP:::1] DEBUG - Current user department_id: 1
+[2025-12-04 13:41:09] [info] [User:1] [IP:::1] DEBUG - View mode: past, Status: all_including_rejected
+[2025-12-04 13:41:09] [info] [User:1] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date < CURDATE()"]
+[2025-12-04 13:41:09] [info] [User:1] [IP:::1] DEBUG - Params: [1]
+[2025-12-04 13:41:09] [info] [User:1] [IP:::1] DEBUG - Total meetings found: 7
+[2025-12-04 13:41:43] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 94351183660
+[2025-12-04 13:41:43] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 94351183660
+[2025-12-04 13:41:44] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:41:44] [info] [User:1] [IP:::1] ✅ Found recordings for meeting 94351183660
+[2025-12-04 13:41:44] [info] [User:1] [IP:::1] 📊 Getting meeting report for: 94351183660
+[2025-12-04 13:41:45] [info] [User:1] [IP:::1] ✅ Meeting details retrieved
+[2025-12-04 13:41:45] [info] [User:1] [IP:::1] ✅ Found 1 participants
+[2025-12-04 13:41:46] [info] [User:1] [IP:::1] ✅ Poll results retrieved
+[2025-12-04 13:41:47] [info] [User:1] [IP:::1] ✅ Q&A report retrieved
+[2025-12-04 13:41:47] [info] [User:1] [IP:::1] ✅ Meeting report compiled successfully for: 94351183660
+[2025-12-04 13:41:58] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 96587991953
+[2025-12-04 13:41:58] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 96587991953
+[2025-12-04 13:41:59] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:41:59] [info] [User:1] [IP:::1] ✅ Found recordings for meeting 96587991953
+[2025-12-04 13:41:59] [info] [User:1] [IP:::1] 📊 Getting meeting report for: 96587991953
+[2025-12-04 13:42:00] [info] [User:1] [IP:::1] ✅ Meeting details retrieved
+[2025-12-04 13:42:00] [info] [User:1] [IP:::1] ✅ Found 30 participants
+[2025-12-04 13:42:01] [info] [User:1] [IP:::1] ✅ Poll results retrieved
+[2025-12-04 13:42:02] [info] [User:1] [IP:::1] ✅ Q&A report retrieved
+[2025-12-04 13:42:02] [info] [User:1] [IP:::1] ✅ Meeting report compiled successfully for: 96587991953
+[2025-12-04 13:43:57] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 93393570969
+[2025-12-04 13:43:57] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 93393570969
+[2025-12-04 13:43:58] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:43:58] [error] [User:1] [IP:::1] ❌ Error getting cloud recordings: Zoom API Error: Bu kayıt mevcut değil. (Code: 404)
+[2025-12-04 13:44:00] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 91588022026
+[2025-12-04 13:44:00] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 91588022026
+[2025-12-04 13:44:01] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:44:01] [info] [User:1] [IP:::1] ✅ Found recordings for meeting 91588022026
+[2025-12-04 13:44:01] [info] [User:1] [IP:::1] 📊 Getting meeting report for: 91588022026
+[2025-12-04 13:44:02] [info] [User:1] [IP:::1] ✅ Meeting details retrieved
+[2025-12-04 13:44:02] [info] [User:1] [IP:::1] ✅ Found 27 participants
+[2025-12-04 13:44:03] [info] [User:1] [IP:::1] ✅ Poll results retrieved
+[2025-12-04 13:44:04] [info] [User:1] [IP:::1] ✅ Q&A report retrieved
+[2025-12-04 13:44:04] [info] [User:1] [IP:::1] ✅ Meeting report compiled successfully for: 91588022026
+[2025-12-04 13:44:46] [info] [User:3] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:44:46] [info] [User:3] [IP:::1] DEBUG - Current user department_id: 2
+[2025-12-04 13:44:46] [info] [User:3] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:44:46] [info] [User:3] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:44:46] [info] [User:3] [IP:::1] DEBUG - Params: [2]
+[2025-12-04 13:44:46] [info] [User:3] [IP:::1] DEBUG - Total meetings found: 0
+[2025-12-04 13:45:34] [info] [User:7] [IP:::1] Getting recordings for Zoom Meeting ID: 93393570969
+[2025-12-04 13:45:34] [info] [User:7] [IP:::1] 📹 Getting cloud recordings for meeting: 93393570969
+[2025-12-04 13:45:34] [info] [User:7] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:45:35] [error] [User:7] [IP:::1] ❌ Error getting cloud recordings: Zoom API Error: Bu kayıt mevcut değil. (Code: 404)
+[2025-12-04 13:45:37] [info] [User:7] [IP:::1] Getting recordings for Zoom Meeting ID: 91588022026
+[2025-12-04 13:45:37] [info] [User:7] [IP:::1] 📹 Getting cloud recordings for meeting: 91588022026
+[2025-12-04 13:45:38] [info] [User:7] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:45:38] [info] [User:7] [IP:::1] ✅ Found recordings for meeting 91588022026
+[2025-12-04 13:45:38] [info] [User:7] [IP:::1] 📊 Getting meeting report for: 91588022026
+[2025-12-04 13:45:39] [info] [User:7] [IP:::1] ✅ Meeting details retrieved
+[2025-12-04 13:45:39] [info] [User:7] [IP:::1] ✅ Found 27 participants
+[2025-12-04 13:45:40] [info] [User:7] [IP:::1] ✅ Poll results retrieved
+[2025-12-04 13:45:41] [info] [User:7] [IP:::1] ✅ Q&A report retrieved
+[2025-12-04 13:45:41] [info] [User:7] [IP:::1] ✅ Meeting report compiled successfully for: 91588022026
+[2025-12-04 13:45:57] [info] [User:7] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:45:57] [info] [User:7] [IP:::1] DEBUG - Current user department_id: 6
+[2025-12-04 13:45:57] [info] [User:7] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:45:57] [info] [User:7] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:45:57] [info] [User:7] [IP:::1] DEBUG - Params: [6]
+[2025-12-04 13:45:57] [info] [User:7] [IP:::1] DEBUG - Total meetings found: 17
+[2025-12-04 13:46:17] [info] [User:7] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 13:46:17] [info] [User:7] [IP:::1] 🔐 FRESH START URL FETCHED: Meeting ID=190 için fresh start URL alındı
+[2025-12-04 13:54:56] [info] [User:7] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 13:54:56] [info] [User:7] [IP:::1] DEBUG - Current user department_id: 6
+[2025-12-04 13:54:56] [info] [User:7] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 13:54:56] [info] [User:7] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 13:54:56] [info] [User:7] [IP:::1] DEBUG - Params: [6]
+[2025-12-04 13:54:56] [info] [User:7] [IP:::1] DEBUG - Total meetings found: 17
+[2025-12-04 14:01:23] [info] [User:7] [IP:::1] DEBUG - All meetings by department: [{"total":7,"department_id":1},{"total":84,"department_id":2},{"total":4,"department_id":3},{"total":6,"department_id":4},{"total":1,"department_id":5},{"total":35,"department_id":6},{"total":11,"department_id":7},{"total":1,"department_id":8},{"total":7,"department_id":9},{"total":3,"department_id":10},{"total":5,"department_id":11},{"total":6,"department_id":12},{"total":1,"department_id":14}]
+[2025-12-04 14:01:23] [info] [User:7] [IP:::1] DEBUG - Current user department_id: 6
+[2025-12-04 14:01:23] [info] [User:7] [IP:::1] DEBUG - View mode: upcoming, Status: all_including_rejected
+[2025-12-04 14:01:23] [info] [User:7] [IP:::1] DEBUG - Where conditions: ["m.department_id = ?","m.date >= CURDATE()","m.status IN ('approved', 'pending')"]
+[2025-12-04 14:01:23] [info] [User:7] [IP:::1] DEBUG - Params: [6]
+[2025-12-04 14:01:23] [info] [User:7] [IP:::1] DEBUG - Total meetings found: 17
+[2025-12-04 14:04:16] [info] [User:7] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 14:04:16] [info] [User:7] [IP:::1] 🔐 FRESH START URL FETCHED: Meeting ID=93393570969 için fresh start URL alındı
+[2025-12-04 14:04:16] [info] [User:7] [IP:::1] Fresh start URL obtained for meeting 190 by user 7
+[2025-12-04 14:04:37] [info] [User:7] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 14:04:38] [info] [User:7] [IP:::1] 🔐 FRESH START URL FETCHED: Meeting ID=93393570969 için fresh start URL alındı
+[2025-12-04 14:04:38] [info] [User:7] [IP:::1] Fresh start URL obtained for meeting 190 by user 7
+[2025-12-04 14:04:58] [info] [User:7] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 14:04:59] [info] [User:7] [IP:::1] 🔐 FRESH START URL FETCHED: Meeting ID=93393570969 için fresh start URL alındı
+[2025-12-04 14:04:59] [info] [User:7] [IP:::1] Fresh start URL obtained for meeting 190 by user 7
+[2025-12-04 14:34:32] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'
+[2025-12-04 14:34:32] [info] [User:1] [IP:::1] ✅ Migration başarılı: 004_add_system_closures
+[2025-12-04 14:34:32] [info] [User:1] [IP:::1] 🔄 Otomatik migration: 004_add_system_closures
+[2025-12-04 14:34:32] [info] [User:1] [IP:::1]  Auto migrations executed on login: 004_add_system_closures
+[2025-12-04 14:57:32] [info] [User:1] [IP:::1] Draft saved for user 1
+[2025-12-04 14:57:53] [info] [User:1] [IP:::1] Draft saved for user 1
+[2025-12-04 14:59:30] [info] [User:1] [IP:::1] Draft saved for user 1
+[2025-12-04 14:59:46] [info] [User:1] [IP:::1] Draft saved for user 1
+[2025-12-04 14:59:56] [info] [User:1] [IP:::1] Draft saved for user 1
+[2025-12-04 15:00:02] [info] [User:1] [IP:::1] Check availability request - Date: 2025-12-05, Start: 01:00, End: 04:15, User: 1
+[2025-12-04 15:00:02] [info] [User:1] [IP:::1] Work hours - WORK_START: 09:00, WORK_END: 18:00
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 207 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 208 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 209 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 210 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 211 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 212 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 213 by user 1
+[2025-12-04 15:00:04] [info] [User:1] [IP:::1] New meeting request created: ID 214 by user 1
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-05, Time=01:00:00-04:15:00
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:05:54] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Zoom meeting created successfully: 94142606527
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/94142606527?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NDE0MjYwNjUyNyIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImI0NTFiMGI0MDRkYjRiZjU4MDAyOTJiNjg0MTE4OWY4Iiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE1NiwiaWF0IjoxNzY0ODQ5OTU2LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.vzbcXNE1ICqIvUMLYHp3Z6ZHN8Td18ybr85kYLcDyic
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/94142606527?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NDE0MjYwNjUyNyIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImI0NTFiMGI0MDRkYjRiZjU4MDAyOTJiNjg0MTE4OWY4Iiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE1NiwiaWF0IjoxNzY0ODQ5OTU2LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.vzbcXNE1ICqIvUMLYHp3Z6ZHN8Td18ybr85kYLcDyic&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=e49e250431
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 207
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 94142606527
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Meeting approved: ID 207, Zoom Account: 2
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-10, Time=01:00:00-04:15:00
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:05:55] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:05:56] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Zoom meeting created successfully: 95362521987
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/95362521987?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NTM2MjUyMTk4NyIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImZhY2E3MWE1NGRhNTQ3YWE5ODBhYjY0ZWExZTUzOTQxIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE1OCwiaWF0IjoxNzY0ODQ5OTU4LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.VC_YiULjTFi6oX5hB-HXeG1znapuVx0IEJAwqCxplcU
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/95362521987?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NTM2MjUyMTk4NyIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImZhY2E3MWE1NGRhNTQ3YWE5ODBhYjY0ZWExZTUzOTQxIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE1OCwiaWF0IjoxNzY0ODQ5OTU4LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.VC_YiULjTFi6oX5hB-HXeG1znapuVx0IEJAwqCxplcU&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=b86b054bda
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 208
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 95362521987
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Meeting approved: ID 208, Zoom Account: 2
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-12, Time=01:00:00-04:15:00
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:05:57] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Zoom meeting created successfully: 95188787236
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/95188787236?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NTE4ODc4NzIzNiIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjdiODQyZTJhMDJjYTQ4YzQ5MTdhOTY1ZWMwNTI3YTNkIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE1OSwiaWF0IjoxNzY0ODQ5OTU5LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.SuWGaQRc7UlZwos2rjC25tDp_AazzY85qQO99sYQSGA
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/95188787236?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NTE4ODc4NzIzNiIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjdiODQyZTJhMDJjYTQ4YzQ5MTdhOTY1ZWMwNTI3YTNkIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE1OSwiaWF0IjoxNzY0ODQ5OTU5LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.SuWGaQRc7UlZwos2rjC25tDp_AazzY85qQO99sYQSGA&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=1389692da1
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 209
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 95188787236
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Meeting approved: ID 209, Zoom Account: 2
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-17, Time=01:00:00-04:15:00
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:05:58] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Zoom meeting created successfully: 99732659146
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/99732659146?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5OTczMjY1OTE0NiIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImRmZmY1MGEwNjFhMDRkN2Y5YTA1OGMyYTY3NjYwNmI4Iiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2MCwiaWF0IjoxNzY0ODQ5OTYwLCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.faFAZMeP2MfMnlnXaztcLxVm39udDEXW_IEhi3UT1IU
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/99732659146?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5OTczMjY1OTE0NiIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImRmZmY1MGEwNjFhMDRkN2Y5YTA1OGMyYTY3NjYwNmI4Iiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2MCwiaWF0IjoxNzY0ODQ5OTYwLCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.faFAZMeP2MfMnlnXaztcLxVm39udDEXW_IEhi3UT1IU&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=de427f6ddd
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 210
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 99732659146
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Meeting approved: ID 210, Zoom Account: 2
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-19, Time=01:00:00-04:15:00
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:05:59] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Zoom meeting created successfully: 91245091204
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/91245091204?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5MTI0NTA5MTIwNCIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjI3MmVjOWRjMDRhYzQyNDU5YjE1NjkxNzQxZjQxMTZlIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2MSwiaWF0IjoxNzY0ODQ5OTYxLCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.LlU58RNucURUSVDgJlWSSBNOVIsxpeNQwd2ha9XhrKo
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/91245091204?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5MTI0NTA5MTIwNCIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjI3MmVjOWRjMDRhYzQyNDU5YjE1NjkxNzQxZjQxMTZlIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2MSwiaWF0IjoxNzY0ODQ5OTYxLCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.LlU58RNucURUSVDgJlWSSBNOVIsxpeNQwd2ha9XhrKo&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=b84cc8ccd3
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 211
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 91245091204
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Meeting approved: ID 211, Zoom Account: 2
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-24, Time=01:00:00-04:15:00
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:06:00] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Zoom meeting created successfully: 97782092132
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/97782092132?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5Nzc4MjA5MjEzMiIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImY1MTdkODQ3YjQxYTRhNWU4M2ZhMTc4ZTc5NWViZGJhIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2MiwiaWF0IjoxNzY0ODQ5OTYyLCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.FG7zcUf4JxtsAaATMhSx_yjvFxIozNgQvQd3RXWY2ZE
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/97782092132?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5Nzc4MjA5MjEzMiIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6ImY1MTdkODQ3YjQxYTRhNWU4M2ZhMTc4ZTc5NWViZGJhIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2MiwiaWF0IjoxNzY0ODQ5OTYyLCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.FG7zcUf4JxtsAaATMhSx_yjvFxIozNgQvQd3RXWY2ZE&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=0e7d357438
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 212
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 97782092132
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Meeting approved: ID 212, Zoom Account: 2
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-26, Time=01:00:00-04:15:00
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:06:01] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:06:02] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Zoom meeting created successfully: 96476493019
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/96476493019?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NjQ3NjQ5MzAxOSIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjMzODgzZmFhOThhMDRmMmZhMGUyYjM0ZDhlMTVmOGFkIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2NCwiaWF0IjoxNzY0ODQ5OTY0LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.8mdu4rZ50NqRNAr7nPgsiJUf76XuWNZzc2Uhj2QkO_A
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/96476493019?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NjQ3NjQ5MzAxOSIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjMzODgzZmFhOThhMDRmMmZhMGUyYjM0ZDhlMTVmOGFkIiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2NCwiaWF0IjoxNzY0ODQ5OTY0LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.8mdu4rZ50NqRNAr7nPgsiJUf76XuWNZzc2Uhj2QkO_A&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=09c76107de
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 213
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 96476493019
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Meeting approved: ID 213, Zoom Account: 2
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Checking zoom account busy: Account ID=2, Date=2025-12-31, Time=01:00:00-04:15:00
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] No conflicting meetings found for zoom account 2
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Custom settings conflict resolved: waiting_room disabled due to join_before_host
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Custom Zoom settings applied: {"join_before_host":true,"host_video":true,"participant_video":true,"mute_upon_entry":true,"auto_recording":"cloud","waiting_room":false}
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] 🎯 HOST DISPLAY NAME: Otomatik belirlendi - 'Furkan YILDIRIM' (User ID: 1)
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Using specific host email for meeting creation: posta@furkanyildirim.com
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] Creating Zoom meeting with endpoint: /users/posta@furkanyildirim.com/meetings
+[2025-12-04 15:06:03] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Start URL enhanced for auth bypass: 16 parameters added
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Zoom meeting created successfully: 96041761203
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Original start_url: https://zoom.us/s/96041761203?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NjA0MTc2MTIwMyIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjgyMGRiMDNiY2RlYjRlNGI4OTQ5NjA4MzEyY2I2MDc4Iiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2NSwiaWF0IjoxNzY0ODQ5OTY1LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.GOgeZVMpjij7NRDWZ2HYjNZ7yERuUN6p-9KxOIZ3lFs
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Enhanced start_url with auth bypass: https://zoom.us/s/96041761203?zak=eyJ0eXAiOiJKV1QiLCJzdiI6IjAwMDAwMiIsInptX3NrbSI6InptX28ybSIsImFsZyI6IkhTMjU2In0.eyJpc3MiOiJ3ZWIiLCJjbHQiOjAsIm1udW0iOiI5NjA0MTc2MTIwMyIsImF1ZCI6ImNsaWVudHNtIiwidWlkIjoiUDdUalRYSW1RMnFJZzVUNWt0enJ6dyIsInppZCI6IjgyMGRiMDNiY2RlYjRlNGI4OTQ5NjA4MzEyY2I2MDc4Iiwic2siOiIwIiwic3R5IjoxMDAsIndjZCI6ImF3MSIsImV4cCI6MTc2NDg1NzE2NSwiaWF0IjoxNzY0ODQ5OTY1LCJhaWQiOiJWcFY4bnFrdVRXLU8yVE05dlpWc3hnIiwiY2lkIjoiIn0.GOgeZVMpjij7NRDWZ2HYjNZ7yERuUN6p-9KxOIZ3lFs&role=host&app_privilege=host&auto_login=true&skip_auth=1&meeting_host=1&bypass_login=true&direct_start=1&host_auth=bypass&login_bypass=1&auth_skip=true&no_login=1&instant_host=true&host_direct=1&auto_host=true&force_host=1&host_key=852744253a
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Zoom API activity logged: create_meeting for meeting 214
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Zoom meeting created successfully via API: Meeting ID 96041761203
+[2025-12-04 15:06:04] [info] [User:1] [IP:::1] Meeting approved: ID 214, Zoom Account: 2
+[2025-12-04 15:15:24] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:25] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 94142606527
+[2025-12-04 15:15:25] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 94142606527
+[2025-12-04 15:15:25] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 207
+[2025-12-04 15:15:25] [info] [User:1] [IP:::1] Meeting cancelled: ID 207
+[2025-12-04 15:15:28] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:29] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 95362521987
+[2025-12-04 15:15:29] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 95362521987
+[2025-12-04 15:15:29] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 208
+[2025-12-04 15:15:29] [info] [User:1] [IP:::1] Meeting cancelled: ID 208
+[2025-12-04 15:15:34] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:34] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 95188787236
+[2025-12-04 15:15:34] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 95188787236
+[2025-12-04 15:15:34] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 209
+[2025-12-04 15:15:34] [info] [User:1] [IP:::1] Meeting cancelled: ID 209
+[2025-12-04 15:15:39] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:40] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 99732659146
+[2025-12-04 15:15:40] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 99732659146
+[2025-12-04 15:15:40] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 210
+[2025-12-04 15:15:40] [info] [User:1] [IP:::1] Meeting cancelled: ID 210
+[2025-12-04 15:15:45] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:46] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 91245091204
+[2025-12-04 15:15:46] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 91245091204
+[2025-12-04 15:15:46] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 211
+[2025-12-04 15:15:46] [info] [User:1] [IP:::1] Meeting cancelled: ID 211
+[2025-12-04 15:15:52] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:53] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 97782092132
+[2025-12-04 15:15:53] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 97782092132
+[2025-12-04 15:15:53] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 212
+[2025-12-04 15:15:53] [info] [User:1] [IP:::1] Meeting cancelled: ID 212
+[2025-12-04 15:15:58] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:15:58] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 96476493019
+[2025-12-04 15:15:58] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 96476493019
+[2025-12-04 15:15:58] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 213
+[2025-12-04 15:15:58] [info] [User:1] [IP:::1] Meeting cancelled: ID 213
+[2025-12-04 15:16:03] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-04 15:16:04] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 96041761203
+[2025-12-04 15:16:04] [info] [User:1] [IP:::1] Zoom meeting deleted successfully: 96041761203
+[2025-12-04 15:16:04] [info] [User:1] [IP:::1] Zoom API activity logged: delete_meeting for meeting 214
+[2025-12-04 15:16:04] [info] [User:1] [IP:::1] Meeting cancelled: ID 214
+[2025-12-04 15:16:05] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'
+[2025-12-04 15:16:13] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'
+[2025-12-04 15:16:31] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'
+[2025-12-04 15:17:07] [info] [User:3] [IP:::1] Draft saved for user 3
+[2025-12-04 15:17:15] [info] [User:3] [IP:::1] Check availability request - Date: 2025-12-05, Start: 10:00, End: 12:15, User: 3
+[2025-12-04 15:17:15] [info] [User:3] [IP:::1] Work hours - WORK_START: 09:00, WORK_END: 18:00
+[2025-12-04 15:18:03] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'

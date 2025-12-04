@@ -11,6 +11,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // Functions.php'yi include et (aktivite kayıtları için)
 require_once __DIR__ . '/../includes/functions.php';
 
+// Migration Manager'ı include et (otomatik veritabanı güncellemeleri için)
+require_once __DIR__ . '/../includes/MigrationManager.php';
+
 /**
  * Custom JWT Implementation
  */
@@ -152,6 +155,19 @@ function loginUser($email, $password) {
         
         // Aktivite kaydet
         logActivity('login', 'user', $user['id'], 'Sisteme giriş yaptı', $user['id']);
+        
+        // Otomatik migration kontrolü - Admin için veritabanı güncellemelerini çalıştır
+        if ($user['role'] === 'admin') {
+            try {
+                $migrationResult = runAutoMigrations();
+                if (!empty($migrationResult['executed'])) {
+                    writeLog(" Auto migrations executed on login: " . implode(', ', $migrationResult['executed']), 'info');
+                }
+            } catch (Exception $e) {
+                // Migration hatası login'i engellemez
+                writeLog("Migration check error: " . $e->getMessage(), 'warning');
+            }
+        }
         
         return [
             'success' => true,
