@@ -1,0 +1,22 @@
+# Hassas konfigürasyon dosyaları
+config/config.php
+config/database.php
+
+# Ortam dosyaları
+.env
+.env.local
+.env.*.local
+
+# Log dosyaları
+logs/*.log
+*.log
+
+# IDE dosyaları
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
