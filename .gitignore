@@ -1,22 +1,36 @@
-# Hassas konfigürasyon dosyaları
-config/config.php
+# Yapılandırma dosyaları (hassas bilgiler içerir)
 config/database.php
+config/config.php
+
+# IDE ve editör dosyaları
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# İşletim sistemi dosyaları
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log dosyaları
+*.log
+logs/app.log
+logs/auth.log
+logs/migration.log
+logs/zoom.log
+
+# Geçici dosyalar
+*.tmp
+*.temp
+.cache/
+
+# Vendor ve bağımlılıklar
+vendor/
+node_modules/
 
 # Ortam dosyaları
 .env
 .env.local
 .env.*.local
-
-# Log dosyaları
-logs/*.log
-*.log
-
-# IDE dosyaları
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS dosyaları
-.DS_Store
-Thumbs.db

@@ -418,3 +418,13 @@
 [2025-12-04 15:17:15] [info] [User:3] [IP:::1] Check availability request - Date: 2025-12-05, Start: 10:00, End: 12:15, User: 3
 [2025-12-04 15:17:15] [info] [User:3] [IP:::1] Work hours - WORK_START: 09:00, WORK_END: 18:00
 [2025-12-04 15:18:03] [error] [User:1] [IP:::1] ❌ Migration hatası: 001_add_zoom_fields - SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'zoom_meeting_id'
+[2025-12-05 10:50:11] [info] [User:1] [IP:::1] Getting recordings for Zoom Meeting ID: 93393570969
+[2025-12-05 10:50:11] [info] [User:1] [IP:::1] 📹 Getting cloud recordings for meeting: 93393570969
+[2025-12-05 10:50:11] [info] [User:1] [IP:::1] OAuth Access Token obtained successfully
+[2025-12-05 10:50:12] [info] [User:1] [IP:::1] ✅ Found recordings for meeting 93393570969
+[2025-12-05 10:50:12] [info] [User:1] [IP:::1] 📊 Getting meeting report for: 93393570969
+[2025-12-05 10:50:12] [info] [User:1] [IP:::1] ✅ Meeting details retrieved
+[2025-12-05 10:50:13] [info] [User:1] [IP:::1] ✅ Found 24 participants
+[2025-12-05 10:50:13] [info] [User:1] [IP:::1] ✅ Poll results retrieved
+[2025-12-05 10:50:14] [info] [User:1] [IP:::1] ✅ Q&A report retrieved
+[2025-12-05 10:50:14] [info] [User:1] [IP:::1] ✅ Meeting report compiled successfully for: 93393570969
