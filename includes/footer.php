@@ -60,7 +60,33 @@
             }
         };
 
-        // Light theme only - no theme management needed
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+        
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const toggleBtn = document.getElementById('theme-toggle');
+            if (toggleBtn) {
+                if (theme === 'dark') {
+                    toggleBtn.classList.add('dark');
+                } else {
+                    toggleBtn.classList.remove('dark');
+                }
+            }
+        }
+        
+        // Initialize theme on page load
+        initTheme();
 
         // Dropdown Management
         function toggleDropdown(dropdownId) {

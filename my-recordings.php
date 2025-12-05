@@ -55,10 +55,11 @@ try {
 }
 
 include 'includes/header.php';
+include 'includes/sidebar.php';
 ?>
 
-<div class="main-content p-6">
-    <div class="max-w-7xl mx-auto">
+<div class="main-content flex-1 p-6">
+    <div class="max-w-4xl mx-auto">
         <!-- Başlık -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
             <div class="flex items-center justify-between flex-wrap gap-4">
@@ -183,8 +184,6 @@ include 'includes/header.php';
     </div>
 </div>
 
-<?php include 'includes/sidebar.php'; ?>
-
 <script>
 // Kayıtları yükle
 async function loadRecordings(meetingId, zoomMeetingId) {
@@ -213,6 +212,24 @@ async function loadRecordings(meetingId, zoomMeetingId) {
         
         if (data.success && data.recordings && data.recordings.length > 0) {
             let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+            
+            // Şifre bilgisi (varsa)
+            if (data.password) {
+                html += '<div class="col-span-full bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-2">' +
+                            '<div class="flex items-center justify-between">' +
+                                '<div class="flex items-center">' +
+                                    '<i class="fas fa-key text-yellow-600 mr-2"></i>' +
+                                    '<span class="text-sm font-medium text-yellow-800">Kayıt Şifresi:</span>' +
+                                '</div>' +
+                                '<div class="flex items-center gap-2">' +
+                                    '<code class="px-3 py-1 bg-yellow-100 text-yellow-900 rounded font-mono text-sm font-bold">' + data.password + '</code>' +
+                                    '<button onclick="copyPassword(\'' + data.password + '\')" class="px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700" title="Şifreyi Kopyala">' +
+                                        '<i class="fas fa-copy"></i>' +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+            }
             
             // Kayıtlar
             html += '<div class="bg-purple-50 border border-purple-200 rounded-lg p-4">' +
@@ -314,6 +331,20 @@ function formatFileSize(bytes) {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+}
+
+// Şifreyi panoya kopyala
+function copyPassword(password) {
+    navigator.clipboard.writeText(password).then(function() {
+        // Toast bildirimi göster
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-pulse';
+        toast.innerHTML = '<i class="fas fa-check mr-2"></i>Şifre kopyalandı!';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }).catch(function(err) {
+        alert('Kopyalama başarısız: ' + err);
+    });
 }
 </script>
 

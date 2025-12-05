@@ -148,6 +148,7 @@ try {
                 'message' => 'Kayıtlar başarıyla alındı',
                 'recordings' => $recordings,
                 'report' => $report,
+                'password' => $recordingsData['password'] ?? null,
                 'meeting_info' => [
                     'topic' => $recordingsData['topic'] ?? '',
                     'start_time' => $recordingsData['start_time'] ?? '',

@@ -14,3 +14,6 @@
 [2025-12-04 15:17:55] [info] [User:Guest] [IP:::1] User logged out - hdoganay@ankara.edu.tr
 [2025-12-04 15:18:00] [warning] [User:Guest] [IP:::1] Login attempt failed: Wrong password - posta@furkanyildirim.com
 [2025-12-04 15:18:03] [info] [User:1] [IP:::1] User logged in successfully - posta@furkanyildirim.com
+[2025-12-05 11:27:23] [info] [User:Guest] [IP:::1] User logged out - posta@furkanyildirim.com
+[2025-12-05 11:27:30] [warning] [User:Guest] [IP:::1] Login attempt failed: Wrong password - posta@furkanyildirim.com
+[2025-12-05 11:27:34] [info] [User:1] [IP:::1] User logged in successfully - posta@furkanyildirim.com

@@ -15,6 +15,13 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+    <script>
+        // Sayfa yüklenirken temanın hemen uygulanması için (yanıp sönme önlenir)
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?><?php echo APP_NAME; ?></title>
@@ -58,6 +65,374 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             --text-muted: #718096;
             --border-color: #e2e8f0;
             --shadow: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+        }
+        
+        /* Dark Theme - Premium Dark */
+        [data-theme="dark"] {
+            --bg-primary: #0f1117;
+            --bg-secondary: #1a1d24;
+            --bg-tertiary: #252932;
+            --bg-hover: #2d323c;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-color: #2d323c;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --card-bg: #1a1d24;
+            --input-bg: #252932;
+            --glass-bg: rgba(26, 29, 36, 0.95);
+            --glass-border: rgba(45, 50, 60, 0.8);
+            --accent-glow: rgba(99, 102, 241, 0.15);
+        }
+        
+        [data-theme="dark"] body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .bg-white {
+            background-color: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] .bg-gray-50,
+        [data-theme="dark"] .bg-gray-100 {
+            background-color: var(--bg-tertiary) !important;
+        }
+        
+        [data-theme="dark"] .text-gray-900,
+        [data-theme="dark"] .text-gray-800 {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .text-gray-700,
+        [data-theme="dark"] .text-gray-600 {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .text-gray-500,
+        [data-theme="dark"] .text-gray-400 {
+            color: var(--text-muted) !important;
+        }
+        
+        [data-theme="dark"] .border-gray-200,
+        [data-theme="dark"] .border-gray-300 {
+            border-color: var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] .shadow-lg,
+        [data-theme="dark"] .shadow-xl {
+            box-shadow: 0 4px 20px var(--shadow), 0 0 40px var(--accent-glow) !important;
+        }
+        
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background-color: var(--input-bg) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] input:focus,
+        [data-theme="dark"] select:focus,
+        [data-theme="dark"] textarea:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+        }
+        
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .header {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+        
+        [data-theme="dark"] .dropdown-content {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .alert-success {
+            background-color: rgba(34, 197, 94, 0.15);
+            border-color: rgba(34, 197, 94, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .alert-error {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .alert-warning {
+            background-color: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .alert-info {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3) !important;
+        }
+        
+        /* Dark tema - tablo ve liste stilleri */
+        [data-theme="dark"] table {
+            background-color: var(--bg-secondary);
+        }
+        
+        [data-theme="dark"] thead {
+            background-color: var(--bg-tertiary) !important;
+        }
+        
+        [data-theme="dark"] tbody tr {
+            border-color: var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] tbody tr:hover {
+            background-color: var(--bg-hover) !important;
+        }
+        
+        [data-theme="dark"] .divide-gray-200 > * {
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Dark tema - kartlar arasında ayırıcı */
+        [data-theme="dark"] .rounded-xl,
+        [data-theme="dark"] .rounded-lg {
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Dark tema - hover efektleri */
+        [data-theme="dark"] .hover\:bg-gray-50:hover,
+        [data-theme="dark"] .hover\:bg-gray-100:hover {
+            background-color: var(--bg-hover) !important;
+        }
+        
+        /* Dark tema - sidebar */
+        [data-theme="dark"] .sidebar,
+        [data-theme="dark"] aside {
+            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Dark tema - footer */
+        [data-theme="dark"] footer {
+            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Dark tema - badge'ler daha belirgin */
+        [data-theme="dark"] .badge,
+        [data-theme="dark"] [class*="bg-green-100"],
+        [data-theme="dark"] [class*="bg-red-100"],
+        [data-theme="dark"] [class*="bg-yellow-100"],
+        [data-theme="dark"] [class*="bg-blue-100"],
+        [data-theme="dark"] [class*="bg-orange-100"],
+        [data-theme="dark"] [class*="bg-purple-100"] {
+            opacity: 0.9;
+        }
+        
+        /* Dark tema - scroll bar */
+        [data-theme="dark"] ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+        
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+        }
+        
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+        
+        /* Dark tema - Filtre kartları ve butonları */
+        [data-theme="dark"] .bg-gradient-to-r.from-slate-50,
+        [data-theme="dark"] .bg-gradient-to-r.from-slate-50.to-gray-50,
+        [data-theme="dark"] [class*="from-slate-50"] {
+            background: var(--bg-secondary) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] .bg-white\/50,
+        [data-theme="dark"] [class*="bg-white/50"] {
+            background-color: var(--bg-tertiary) !important;
+        }
+        
+        /* Dark tema - Filtre butonları */
+        [data-theme="dark"] a[class*="bg-white"][class*="border-gray"] {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] a[class*="bg-white"][class*="border-gray"]:hover {
+            background-color: var(--bg-hover) !important;
+        }
+        
+        /* Dark tema - İstatistik kartları ikonları */
+        [data-theme="dark"] [class*="bg-orange-100"],
+        [data-theme="dark"] [class*="bg-green-100"],
+        [data-theme="dark"] [class*="bg-red-100"],
+        [data-theme="dark"] [class*="bg-blue-100"] {
+            background-color: rgba(99, 102, 241, 0.2) !important;
+        }
+        
+        /* Dark tema - hover:bg stilleri */
+        [data-theme="dark"] [class*="hover:bg-orange-50"]:hover,
+        [data-theme="dark"] [class*="hover:bg-green-50"]:hover,
+        [data-theme="dark"] [class*="hover:bg-red-50"]:hover,
+        [data-theme="dark"] [class*="hover:bg-blue-50"]:hover,
+        [data-theme="dark"] [class*="hover:bg-indigo-50"]:hover,
+        [data-theme="dark"] [class*="hover:bg-purple-50"]:hover,
+        [data-theme="dark"] [class*="hover:bg-cyan-50"]:hover {
+            background-color: var(--bg-hover) !important;
+        }
+        
+        /* Dark tema - text-gray-500 ve text-gray-600 hover renkleri */
+        [data-theme="dark"] .text-gray-500,
+        [data-theme="dark"] .text-gray-600 {
+            color: var(--text-muted) !important;
+        }
+        
+        /* Dark tema - Gradient arka planlar korunur, shadow'lar güncellenir */
+        [data-theme="dark"] [class*="shadow-orange-200"],
+        [data-theme="dark"] [class*="shadow-green-200"],
+        [data-theme="dark"] [class*="shadow-red-200"],
+        [data-theme="dark"] [class*="shadow-gray-300"] {
+            --tw-shadow-color: rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Dark tema - border-gray-100 ve border-gray-200 */
+        [data-theme="dark"] .border-gray-100 {
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Dark tema - Tablo header */
+        [data-theme="dark"] .uppercase.tracking-wider {
+            color: var(--text-muted) !important;
+        }
+        
+        /* Dark tema - Takvim */
+        [data-theme="dark"] #calendar-grid > div {
+            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] #calendar-grid > div.bg-blue-50 {
+            background-color: rgba(99, 102, 241, 0.15) !important;
+            border-color: #6366f1 !important;
+        }
+        
+        [data-theme="dark"] #calendar-grid .bg-green-100 {
+            background-color: rgba(34, 197, 94, 0.25) !important;
+            color: #4ade80 !important;
+        }
+        
+        [data-theme="dark"] #calendar-grid .bg-orange-100 {
+            background-color: rgba(251, 146, 60, 0.25) !important;
+            color: #fb923c !important;
+        }
+        
+        [data-theme="dark"] #calendar-grid .text-blue-600 {
+            color: #818cf8 !important;
+        }
+        
+        /* Dark tema - Takvim boş günler */
+        [data-theme="dark"] .bg-gray-50 {
+            background-color: var(--bg-tertiary) !important;
+        }
+        
+        /* Dark tema - Takvim etkinlik kartları genel */
+        [data-theme="dark"] .text-green-800 {
+            color: #86efac !important;
+        }
+        
+        [data-theme="dark"] .text-orange-800 {
+            color: #fdba74 !important;
+        }
+        
+        /* Dark tema - Meeting listesi hover */
+        [data-theme="dark"] .hover\:bg-gray-50:hover {
+            background-color: var(--bg-hover) !important;
+        }
+        
+        /* Dark tema - Modal */
+        [data-theme="dark"] #meeting-modal > div {
+            background-color: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Theme toggle button */
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+        }
+        
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .theme-toggle.dark::before {
+            transform: translateX(24px);
+        }
+        
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle .icon-sun {
+            left: 6px;
+            color: #fbbf24;
+            opacity: 1;
+        }
+        
+        .theme-toggle .icon-moon {
+            right: 6px;
+            color: #e2e8f0;
+            opacity: 0.5;
+        }
+        
+        .theme-toggle.dark .icon-sun {
+            opacity: 0.5;
+        }
+        
+        .theme-toggle.dark .icon-moon {
+            opacity: 1;
         }
         
         body {
@@ -144,23 +519,23 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
         }
         
-                    /* Header styles */
-            .header {
-                background: var(--bg-secondary);
-                border-bottom: 1px solid var(--border-color);
-                box-shadow: 0 2px 10px var(--shadow);
-                position: sticky;
-                top: 0;
-                z-index: 1000;
-            }
-            
-            /* Search styles */
-            .line-clamp-1 {
-                overflow: hidden;
-                display: -webkit-box;
-                -webkit-line-clamp: 1;
-                -webkit-box-orient: vertical;
-            }
+        /* Header styles */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        /* Search styles */
+        .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+        }
         
         /* Dropdown styles */
         .dropdown {
@@ -718,6 +1093,12 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
             <!-- Header Actions -->
             <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
+                    <i class="fas fa-sun icon-sun"></i>
+                    <i class="fas fa-moon icon-moon"></i>
+                </button>
+                
                 <!-- User Dropdown -->
                 <div class="relative dropdown">
                     <button

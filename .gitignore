@@ -2,12 +2,7 @@
 config/database.php
 config/config.php
 
-# IDE ve editör dosyaları
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
+
 
 # İşletim sistemi dosyaları
 .DS_Store
@@ -21,16 +16,3 @@ logs/auth.log
 logs/migration.log
 logs/zoom.log
 
-# Geçici dosyalar
-*.tmp
-*.temp
-.cache/
-
-# Vendor ve bağımlılıklar
-vendor/
-node_modules/
-
-# Ortam dosyaları
-.env
-.env.local
-.env.*.local

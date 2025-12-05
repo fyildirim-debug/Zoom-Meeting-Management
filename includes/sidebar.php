@@ -585,7 +585,13 @@ function isActiveMenu($url) {
     
     
     function openBulkApprovalModal() {
-        window.location.href = 'admin/meeting-approvals.php';
+        // Admin dizininde mi kontrol et
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/admin/')) {
+            window.location.href = 'meeting-approvals.php';
+        } else {
+            window.location.href = 'admin/meeting-approvals.php';
+        }
     }
     
     // Load stats on page load

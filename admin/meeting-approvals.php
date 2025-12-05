@@ -1078,19 +1078,19 @@ include '../includes/sidebar.php';
 </div>
 
 <!-- Approve Meeting Modal -->
-<div id="approveMeetingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100000]">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full">
+<div id="approveMeetingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100000] overflow-y-auto">
+    <div class="flex items-start md:items-center justify-center min-h-screen p-2 md:p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl my-4 md:my-8">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Toplantıyı Onayla</h3>
             </div>
             
-            <form method="POST" class="p-6">
+            <form method="POST" class="p-4 md:p-6 max-h-[80vh] overflow-y-auto">
                 <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                 <input type="hidden" name="action" value="approve_meeting">
                 <input type="hidden" name="meeting_id" id="approve_meeting_id">
                 
-                <div class="mb-6">
+                <div class="mb-4 md:mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Zoom Hesabı <span class="text-red-500">*</span></label>
                     <select name="zoom_account_id" class="form-select" required>
                         <option value="">Zoom hesabı seçin...</option>
