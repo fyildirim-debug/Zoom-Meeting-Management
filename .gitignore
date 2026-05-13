@@ -1,18 +1,89 @@
-# Yapılandırma dosyaları (hassas bilgiler içerir)
-config/database.php
+# ─────────────────────────────────────────────────────────
+#  KURULUM/RUNTIME ÜRETİLEN DOSYALAR
+#  (Her sunucuda install wizard'dan tekrar üretilir)
+# ─────────────────────────────────────────────────────────
+
+# Yapılandırma dosyaları — her kuruluma özel (DB credentials, JWT secret, vb.)
 config/config.php
+config/database.php
 
+# Kurulum sonrası oluşan kilit dosyası
+install/.htaccess
 
+# ─────────────────────────────────────────────────────────
+#  VERİ DOSYALARI (asla commit edilmez)
+#  data/ klasöründe sadece .htaccess + index.html korunur
+# ─────────────────────────────────────────────────────────
+data/*
+!data/.htaccess
+!data/backups/
+data/backups/*
+!data/backups/.htaccess
+!data/backups/index.html
 
-# İşletim sistemi dosyaları
-.DS_Store
-Thumbs.db
-desktop.ini
+# Lokal SQLite veritabanı dosyaları
+*.sqlite
+*.sqlite3
+*.db
+database/*.sqlite
+database/*.db
 
-# Log dosyaları
+# ─────────────────────────────────────────────────────────
+#  LOG DOSYALARI
+# ─────────────────────────────────────────────────────────
 *.log
+logs/*.log
 logs/app.log
 logs/auth.log
 logs/migration.log
 logs/zoom.log
 
+# ─────────────────────────────────────────────────────────
+#  İŞLETİM SİSTEMİ
+# ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# ─────────────────────────────────────────────────────────
+#  IDE / EDİTÖR
+# ─────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.buildpath
+nbproject/
+*.code-workspace
+
+# ─────────────────────────────────────────────────────────
+#  PHP / COMPOSER (gelecekte kullanılırsa)
+# ─────────────────────────────────────────────────────────
+vendor/
+composer.lock
+
+# ─────────────────────────────────────────────────────────
+#  GEÇİCİ / YEDEK DOSYALAR
+# ─────────────────────────────────────────────────────────
+*.tmp
+*.bak
+*.backup
+*.old
+*~
+
+# ─────────────────────────────────────────────────────────
+#  GELİŞTİRME ZIP'LERİ (manuel bundle'lar)
+# ─────────────────────────────────────────────────────────
+zmm-backup-feature-*.zip
+backup-changes-*.zip
+
+# ─────────────────────────────────────────────────────────
+#  CLAUDE / SERENA META (proje dışı araç)
+# ─────────────────────────────────────────────────────────
+.serena/
+.claude/

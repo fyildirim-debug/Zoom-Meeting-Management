@@ -1660,10 +1660,165 @@ try {
             echo '<script>alert("Hata: ' . addslashes($e->getMessage()) . '"); window.history.back();</script>';
             exit;
         }
+    } elseif ($action === 'peek_backup') {
+        // Yüklenen yedek ZIP'ten manifest oku — yalnızca önizleme
+        require_once '../includes/BackupManager.php';
+
+        if (!isset($_FILES['backup_file']) || $_FILES['backup_file']['error'] !== UPLOAD_ERR_OK) {
+            jsonResponse(false, 'Yedek dosyası yüklenemedi.');
+        }
+        $tmp = $_FILES['backup_file']['tmp_name'];
+        if (!is_uploaded_file($tmp)) {
+            jsonResponse(false, 'Geçersiz dosya yüklemesi.');
+        }
+
+        $manifest = BackupManager::peekManifest($tmp);
+        if ($manifest === null) {
+            jsonResponse(false, 'Geçersiz veya bozuk yedek dosyası (manifest.json okunamadı).');
+        }
+        jsonResponse(true, 'Manifest okundu', ['manifest' => $manifest]);
+
+    } elseif ($action === 'install_from_backup') {
+        // Yedekten geri yükleme ile kurulum
+        require_once '../includes/BackupManager.php';
+
+        checkAlreadyInstalled();
+
+        // Yüklenen yedek dosyasını al
+        if (!isset($_FILES['backup_file']) || $_FILES['backup_file']['error'] !== UPLOAD_ERR_OK) {
+            jsonResponse(false, 'Yedek dosyası yüklenemedi.');
+        }
+        $tmpUpload = $_FILES['backup_file']['tmp_name'];
+        if (!is_uploaded_file($tmpUpload)) {
+            jsonResponse(false, 'Geçersiz dosya yüklemesi.');
+        }
+
+        // Manifest doğrula
+        $manifest = BackupManager::peekManifest($tmpUpload);
+        if ($manifest === null) {
+            jsonResponse(false, 'Yedek dosyası bozuk veya manifest yok.');
+        }
+
+        // DB config
+        $dbType = sanitizeInput($_POST['db_type'] ?? '');
+        if ($dbType === 'mysql') {
+            validateRequiredFields(['db_host', 'db_port', 'db_name', 'db_username'], $_POST);
+            $dbConfig = [
+                'type' => 'mysql',
+                'host' => sanitizeInput($_POST['db_host']),
+                'port' => sanitizeInput($_POST['db_port']),
+                'database' => sanitizeInput($_POST['db_name']),
+                'username' => sanitizeInput($_POST['db_username']),
+                'password' => $_POST['db_password'] ?? '',
+                'auto_create_db' => isset($_POST['auto_create_db']) && $_POST['auto_create_db'] === '1',
+            ];
+        } else {
+            $dbConfig = [
+                'type' => 'sqlite',
+                'file' => 'zoom_meetings_' . date('Ymd_His') . '.sqlite',
+            ];
+        }
+
+        // Yedek dosyasını kalıcı yere taşı (audit + erişim için)
+        $backupStorageDir = realpath('..') . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'backups';
+        if (!is_dir($backupStorageDir)) {
+            @mkdir($backupStorageDir, 0755, true);
+        }
+        $storedName = 'install-restore-' . date('Y-m-d-His') . '.zip';
+        $storedPath = $backupStorageDir . DIRECTORY_SEPARATOR . $storedName;
+        if (!@move_uploaded_file($tmpUpload, $storedPath)) {
+            jsonResponse(false, 'Yedek dosyası kaydedilemedi: ' . $storedPath);
+        }
+
+        try {
+            // 1. Veritabanı oluştur
+            $dbResult = createDatabase($dbConfig);
+            if (!$dbResult['success']) {
+                jsonResponse(false, 'Veritabanı oluşturma hatası: ' . $dbResult['message']);
+            }
+            $pdo = $dbResult['pdo'];
+            $databaseName = $dbResult['database_name'];
+
+            // 2. Şemayı oluştur (BackupManager INSERT için tablolar gerekli)
+            createDatabaseTables($pdo, $dbConfig['type']);
+
+            // 3. Migration'ları çalıştır (en güncel kolonlar için)
+            runDatabaseMigrations($pdo, $dbConfig['type']);
+
+            // 4. system_closures gibi MigrationManager migration'larını da çalıştır
+            //    (config henüz yazılmadığı için DB_TYPE constant'ı tanımlı değil — manuel yol)
+            try {
+                require_once '../includes/MigrationManager.php';
+                $mm = new MigrationManager($pdo);
+                $mm->runPendingMigrations();
+            } catch (Exception $e) {
+                error_log('install_from_backup: migration manager hatası (görmezden geliniyor): ' . $e->getMessage());
+            }
+
+            // 5. Yedeği import et
+            $backupMgr = new BackupManager($pdo, $dbConfig['type']);
+            $importResult = $backupMgr->importFromZip($storedPath);
+            if (!$importResult['success']) {
+                jsonResponse(false, 'Yedek import hatası: ' . $importResult['message'], [
+                    'log' => $importResult['log'] ?? [],
+                ]);
+            }
+
+            // 6. Config dosyalarını üret. systemConfig'i settings tablosundan oku (yedekten geldi).
+            $systemConfig = [
+                'site_title' => 'Zoom Toplantı Yönetim Sistemi',
+                'work_start' => '09:00',
+                'work_end' => '18:00',
+                'timezone' => 'Europe/Istanbul',
+            ];
+            try {
+                $settingsStmt = $pdo->query("SELECT setting_key, setting_value FROM settings");
+                $loaded = [];
+                foreach ($settingsStmt->fetchAll() as $row) {
+                    $loaded[$row['setting_key']] = $row['setting_value'];
+                }
+                foreach (['site_title', 'work_start', 'work_end', 'timezone'] as $key) {
+                    if (!empty($loaded[$key])) {
+                        $systemConfig[$key] = $loaded[$key];
+                    }
+                }
+            } catch (Exception $e) {
+                // settings tablosu yedeğinde yoksa default'larla devam et
+            }
+
+            createConfigFiles($dbConfig, $systemConfig);
+
+            // 7. Güvenlik dosyaları
+            createSecurityFiles();
+
+            // 8. Yedekteki admin email'ini bul (kullanıcıya başarı mesajında göstermek için)
+            $adminEmail = '(yedekten geldi)';
+            try {
+                $stmt = $pdo->query("SELECT email FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+                $row = $stmt->fetch();
+                if ($row && !empty($row['email'])) {
+                    $adminEmail = $row['email'];
+                }
+            } catch (Exception $e) {
+                // ignore
+            }
+
+            jsonResponse(true, 'Yedekten geri yükleme başarıyla tamamlandı!', [
+                'admin_email' => $adminEmail,
+                'database_name' => $databaseName,
+                'backup_file' => $storedName,
+                'manifest' => $importResult['manifest'] ?? null,
+                'log' => $importResult['log'] ?? [],
+            ]);
+
+        } catch (Exception $e) {
+            jsonResponse(false, 'Geri yükleme hatası: ' . $e->getMessage());
+        }
+
     } else {
         jsonResponse(false, 'Geçersiz işlem.');
     }
-    
+
 } catch (Exception $e) {
     jsonResponse(false, 'Beklenmeyen hata: ' . $e->getMessage());
 }

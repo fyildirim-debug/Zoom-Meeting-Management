@@ -61,6 +61,12 @@ $adminMenuItems = [
         'icon' => 'fas fa-calendar-times',
         'url' => $adminPrefix . 'system-closures.php',
         'badge' => null
+    ],
+    [
+        'title' => 'Yedekleme',
+        'icon' => 'fas fa-database',
+        'url' => $adminPrefix . 'backup.php',
+        'badge' => null
     ]
 ];
 

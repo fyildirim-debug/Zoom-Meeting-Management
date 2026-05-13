@@ -1051,3 +1051,275 @@ function showSampleDataConfirmation() {
         };
     });
 }
+
+// ============================================================
+//  RESTORE-FROM-BACKUP MODU (kurulum sihirbazına eklendi)
+// ============================================================
+
+// Aktif kurulum modu: 'new' veya 'restore'
+let installMode = 'new';
+
+// Step 1'deki radio kartlarına tıklanınca çağrılır
+window.setInstallMode = function(mode) {
+    installMode = mode;
+    document.body.classList.remove('mode-new', 'mode-restore');
+    document.body.classList.add('mode-' + mode);
+
+    // Kart seçim stillerini güncelle
+    document.querySelectorAll('.install-mode-card').forEach(card => {
+        const input = card.querySelector('input[name="install_mode"]');
+        if (input && input.value === mode) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    });
+};
+
+// Sayfa yüklendiğinde varsayılan modu uygula
+document.addEventListener('DOMContentLoaded', function() {
+    // İlk kartı seçili olarak işaretle
+    const firstCard = document.querySelector('.install-mode-card');
+    if (firstCard) {
+        firstCard.classList.add('selected');
+    }
+    // step 5 indicator'larını mod'a göre uygulayan event yok — manuel set
+    updateStepLabels();
+});
+
+// Dosya seçildiğinde önizleme (manifest okumak için yedeği server-side okumamız gerekiyor —
+// burada sadece dosya adı/boyutu göster, manifest detayını Step 4'te göster).
+window.handleBackupFileSelect = function(input) {
+    const fileNameEl = document.getElementById('backup-file-name');
+    const previewEl = document.getElementById('backup-preview');
+    const previewContent = document.getElementById('backup-preview-content');
+
+    if (!input.files || input.files.length === 0) {
+        fileNameEl.textContent = 'Yedek dosyasını seçmek için tıklayın';
+        previewEl.classList.add('hidden');
+        return;
+    }
+
+    const file = input.files[0];
+
+    // Uzantı kontrolü
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+        showToast('Sadece .zip uzantılı yedek dosyaları kabul edilir.', 'error');
+        input.value = '';
+        return;
+    }
+
+    fileNameEl.textContent = file.name;
+    previewEl.classList.remove('hidden');
+    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+    previewContent.innerHTML = `
+        <div><strong>Dosya:</strong> ${file.name}</div>
+        <div><strong>Boyut:</strong> ${sizeMB} MB</div>
+        <div class="opacity-70 text-xs mt-2">Manifest detayları sonraki adımda görüntülenecek.</div>
+    `;
+};
+
+// Step 4'te yedek manifest'ini sunucuda okuyup gösterir
+async function loadBackupManifest() {
+    const fileInput = document.getElementById('backup_file');
+    const target = document.getElementById('restore-confirm-content');
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        if (target) target.innerHTML = '<p class="text-red-300 text-center">Önce bir yedek dosyası seçin.</p>';
+        return;
+    }
+
+    if (target) target.innerHTML = '<p class="text-white opacity-80 text-center"><span class="loading-spinner inline-block"></span> Yedek okunuyor...</p>';
+
+    const formData = new FormData();
+    formData.append('action', 'peek_backup');
+    formData.append('backup_file', fileInput.files[0]);
+
+    try {
+        const response = await fetch('process.php', { method: 'POST', body: formData });
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            throw new Error('Sunucudan geçersiz yanıt: ' + text.substring(0, 200));
+        }
+
+        if (!result.success) {
+            target.innerHTML = `<div class="text-red-300 text-center"><i class="fas fa-times-circle mr-1"></i>${result.message}</div>`;
+            return;
+        }
+
+        const m = result.data.manifest;
+        const rowsHtml = (m.tables || []).map(t => {
+            const count = (m.row_counts && m.row_counts[t] !== undefined) ? m.row_counts[t] : 0;
+            return `<div class="flex justify-between py-1 border-b border-white border-opacity-10"><span>${t}</span><span class="font-mono opacity-80">${count} satır</span></div>`;
+        }).join('');
+
+        target.innerHTML = `
+            <div class="space-y-2 text-white text-sm">
+                <div class="flex justify-between"><span class="opacity-70">Yedek sürüm:</span> <span class="font-semibold">v${m.app_version || '?'}</span></div>
+                <div class="flex justify-between"><span class="opacity-70">Kaynak DB:</span> <span class="uppercase">${m.db_type || '?'}</span></div>
+                <div class="flex justify-between"><span class="opacity-70">Oluşturulma:</span> <span>${m.generated_at || '?'}</span></div>
+                <div class="flex justify-between"><span class="opacity-70">Toplam tablo:</span> <span>${(m.tables || []).length}</span></div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-white border-opacity-20">
+                <div class="text-white font-semibold text-sm mb-2">Tablo İçerikleri:</div>
+                <div class="text-white text-xs max-h-60 overflow-y-auto">${rowsHtml}</div>
+            </div>
+        `;
+    } catch (e) {
+        target.innerHTML = `<div class="text-red-300 text-center"><i class="fas fa-times-circle mr-1"></i>${e.message}</div>`;
+    }
+}
+
+// Step indicator etiketlerini moda göre güncelle
+function updateStepLabels() {
+    const labels = installMode === 'restore'
+        ? { 1: 'Mod', 2: 'Veritabanı', 3: 'Yedek Yükle', 4: 'Onay', 5: 'Tamamla' }
+        : { 1: 'Hoş Geldin', 2: 'Veritabanı', 3: 'Admin', 4: 'Ayarlar', 5: 'Tamamla' };
+
+    document.querySelectorAll('.step-indicator').forEach(ind => {
+        const step = ind.getAttribute('data-step');
+        let labelEl = ind.querySelector('.step-indicator-label');
+        if (!labelEl) {
+            labelEl = document.createElement('span');
+            labelEl.className = 'step-indicator-label';
+            ind.appendChild(labelEl);
+        }
+        labelEl.textContent = labels[step] || '';
+    });
+}
+
+// nextStep'i restore moduna duyarlı yap (validateStep override)
+const _originalValidateStep = validateStep;
+validateStep = function(step) {
+    if (installMode === 'restore') {
+        // Step 3 (yedek yükle): dosya seçilmiş olmalı
+        if (step === 3) {
+            const fileInput = document.getElementById('backup_file');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                showToast('Lütfen bir yedek dosyası seçin.', 'error');
+                return false;
+            }
+            return true;
+        }
+        // Step 4 (onay): checkbox işaretli olmalı + manifest yüklenmiş olmalı
+        if (step === 4) {
+            const cb = document.getElementById('restore_confirm_checkbox');
+            if (!cb || !cb.checked) {
+                showToast('Lütfen geri yükleme onay kutusunu işaretleyin.', 'error');
+                return false;
+            }
+            return true;
+        }
+        // Step 1 ve 2: geriye dön — Step 2'de DB validation yine çalışsın
+        if (step === 2) {
+            return validateDatabaseStep();
+        }
+        return true;
+    }
+    return _originalValidateStep(step);
+};
+
+// Step gösterimi sırasında, restore modunda step 4'e girince manifest'i göster
+const _originalShowStep = showStep;
+showStep = function(step) {
+    _originalShowStep(step);
+    updateStepLabels();
+    if (installMode === 'restore' && step === 4) {
+        // Asenkron — show animasyonu bittikten sonra çalıştır
+        setTimeout(() => loadBackupManifest(), 250);
+    }
+};
+
+// Restore modunda startInstallation farklı çalışmalı
+const _originalStartInstallation = startInstallation;
+startInstallation = async function() {
+    if (installMode !== 'restore') {
+        return _originalStartInstallation();
+    }
+
+    // Restore modu — admin/site ayarları doğrulamasını atla
+    const installBtn = document.getElementById('install-btn');
+    const installText = document.getElementById('install-text');
+    const installSpinner = document.getElementById('install-spinner');
+    const prevBtn = document.getElementById('install-prev-btn');
+
+    installBtn.disabled = true;
+    if (prevBtn) prevBtn.disabled = true;
+    if (installText) installText.textContent = 'Geri yükleniyor...';
+    if (installSpinner) installSpinner.style.display = 'inline-block';
+    installBtn.classList.add('opacity-75');
+
+    // Adım metinlerini restore'a göre güncelle
+    const stepConfig = document.querySelector('[data-step="config"] span');
+    const stepDb = document.querySelector('[data-step="database"] span');
+    const stepAdmin = document.querySelector('[data-step="admin"] span');
+    const stepSample = document.querySelector('[data-step="sample"] span');
+    const stepSec = document.querySelector('[data-step="security"] span');
+    if (stepConfig) stepConfig.textContent = 'Yapılandırma dosyaları oluşturuluyor...';
+    if (stepDb) stepDb.textContent = 'Veritabanı şeması oluşturuluyor...';
+    if (stepAdmin) stepAdmin.textContent = 'Yedek dosyası açılıyor...';
+    if (stepSample) stepSample.textContent = 'Veriler yedekten yükleniyor...';
+    if (stepSec) stepSec.textContent = 'Güvenlik ayarları yapılandırılıyor...';
+
+    const formData = new FormData();
+    formData.append('action', 'install_from_backup');
+
+    // DB ayarları
+    formData.append('db_type', document.getElementById('db_type').value);
+    if (document.getElementById('db_type').value === 'mysql') {
+        formData.append('db_host', document.getElementById('db_host').value);
+        formData.append('db_port', document.getElementById('db_port').value);
+        formData.append('db_name', document.getElementById('db_name').value);
+        formData.append('db_username', document.getElementById('db_username').value);
+        formData.append('db_password', document.getElementById('db_password').value);
+        const autoCreate = document.getElementById('auto_create_db');
+        if (autoCreate && autoCreate.checked) {
+            formData.append('auto_create_db', '1');
+        }
+    }
+
+    // Yedek dosyası
+    const fileInput = document.getElementById('backup_file');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showToast('Yedek dosyası kaybolmuş. Önceki adıma dönüp tekrar seçin.', 'error');
+        return;
+    }
+    formData.append('backup_file', fileInput.files[0]);
+
+    try {
+        await installStep('config', 'Yapılandırma dosyaları oluşturuluyor...', 1200);
+        await installStep('database', 'Veritabanı şeması oluşturuluyor...', 1500);
+        await installStep('admin', 'Yedek dosyası açılıyor...', 800);
+
+        const response = await fetch('process.php', { method: 'POST', body: formData });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            throw new Error('Sunucudan geçersiz JSON yanıtı: ' + text.substring(0, 200));
+        }
+
+        await installStep('sample', 'Veriler yedekten yükleniyor...', 600);
+        await installStep('security', 'Güvenlik ayarları yapılandırılıyor...', 600);
+
+        if (result.success) {
+            showInstallationResult(true, result.data?.admin_email || '(yedekten geldi)', result.data?.database_name || '');
+            showToast('Yedekten geri yükleme başarıyla tamamlandı! 🎉', 'success');
+        } else {
+            throw new Error(result.message || 'Geri yükleme başarısız');
+        }
+    } catch (e) {
+        console.error('Restore error:', e);
+        showToast('Geri yükleme hatası: ' + e.message, 'error');
+        showInstallationResult(false);
+        installBtn.disabled = false;
+        if (prevBtn) prevBtn.disabled = false;
+        if (installText) installText.textContent = '🚀 Kurulumu Başlat';
+        if (installSpinner) installSpinner.style.display = 'none';
+        installBtn.classList.remove('opacity-75');
+    }
+};

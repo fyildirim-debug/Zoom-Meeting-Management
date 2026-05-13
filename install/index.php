@@ -206,14 +206,48 @@ if (file_exists('../database/zoom_meetings.db')) {
         .pulse-animation {
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
+
+        /* Install mode (yeni kurulum / yedekten yükle) seçim kartları */
+        .install-mode-card.selected {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3);
+        }
+
+        /* JS-bagimsiz fallback: radio:checked ile kart secimi */
+        .install-mode-card:has(input[type="radio"]:checked) {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Restore modunda gizlenecek kısımlar */
+        body.mode-restore .mode-new-only { display: none !important; }
+        body.mode-new .mode-restore-only { display: none !important; }
+
+        /* JS-bagimsiz fallback: radio secimine gore step icerigini topla/goster */
+        body:has(input[name="install_mode"][value="restore"]:checked) .mode-new-only { display: none !important; }
+        body:has(input[name="install_mode"][value="new"]:checked) .mode-restore-only { display: none !important; }
+
+        /* Adım etiketleri */
+        .step-indicator-label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+        }
     </style>
 </head>
-<body>
+<body class="mode-new">
     <div class="container mx-auto px-4 py-8 relative z-10">
         <div class="max-w-4xl mx-auto">
             <!-- Existing Installation Check -->
@@ -415,6 +449,42 @@ if (file_exists('../database/zoom_meetings.db')) {
                                 </div>
                             </div>
                             
+                            <!-- Kurulum modu seçimi -->
+                            <div class="text-left mb-8 bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                                <h3 class="text-2xl font-semibold text-white mb-6 text-center">Kurulum Türü</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label class="install-mode-card cursor-pointer block p-5 rounded-xl border-2 border-white border-opacity-30 hover:bg-white hover:bg-opacity-10 transition-all">
+                                        <input type="radio" name="install_mode" value="new" checked class="sr-only" onchange="window.setInstallMode('new')">
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div class="text-white font-semibold mb-1">Yeni Temiz Kurulum</div>
+                                                <div class="text-white opacity-70 text-sm">Sıfırdan kurulum. Yönetici hesabı ve sistem ayarlarını yapılandıracaksınız.</div>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label class="install-mode-card cursor-pointer block p-5 rounded-xl border-2 border-white border-opacity-30 hover:bg-white hover:bg-opacity-10 transition-all">
+                                        <input type="radio" name="install_mode" value="restore" class="sr-only" onchange="window.setInstallMode('restore')">
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div class="text-white font-semibold mb-1">Yedekten Geri Yükle</div>
+                                                <div class="text-white opacity-70 text-sm">Önceki yedek dosyasından (.zip) tüm veriyi yükleyin. Admin bilgisi yedekten gelir.</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="text-left mb-8 bg-white bg-opacity-5 backdrop-blur-lg rounded-2xl p-6">
                                 <h3 class="text-2xl font-semibold text-white mb-6 text-center">Sistem Özellikleri</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -620,46 +690,82 @@ if (file_exists('../database/zoom_meetings.db')) {
                         </div>
                     </div>
 
-                    <!-- Step 3: Admin Kullanıcı -->
+                    <!-- Step 3: Admin Kullanıcı (new) / Yedek Yükle (restore) -->
                     <div class="form-step" data-step="3">
-                        <div class="text-center mb-8">
-                            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl">
-                                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        <div class="mode-new-only">
+                            <div class="text-center mb-8">
+                                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-3xl font-bold text-white mb-4">Yönetici Hesabı</h2>
+                                <p class="text-white opacity-80">Sistem yöneticisi bilgilerini girin</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-white text-sm font-semibold mb-3">Ad</label>
+                                    <input type="text" id="admin_name" name="admin_name" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="Admin" required>
+                                </div>
+                                <div>
+                                    <label class="block text-white text-sm font-semibold mb-3">Soyad</label>
+                                    <input type="text" id="admin_surname" name="admin_surname" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="Kullanıcı" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-white text-sm font-semibold mb-3">E-posta Adresi</label>
+                                <input type="email" id="admin_email" name="admin_email" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="admin@firma.com" required>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-white text-sm font-semibold mb-3">Şifre</label>
+                                    <input type="password" id="admin_password" name="admin_password" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="••••••••" required>
+                                </div>
+                                <div>
+                                    <label class="block text-white text-sm font-semibold mb-3">Şifre Tekrar</label>
+                                    <input type="password" id="admin_password_confirm" name="admin_password_confirm" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="••••••••" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mode-restore-only">
+                            <div class="text-center mb-8">
+                                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-3xl font-bold text-white mb-4">Yedek Dosyasını Yükle</h2>
+                                <p class="text-white opacity-80">Daha önce alınmış (.zip) yedek dosyasını seçin</p>
+                            </div>
+
+                            <div class="bg-white bg-opacity-10 backdrop-blur-lg border-2 border-dashed border-white border-opacity-30 rounded-2xl p-8 mb-6 text-center cursor-pointer hover:bg-opacity-20 transition-all" onclick="document.getElementById('backup_file').click()">
+                                <svg class="w-16 h-16 mx-auto mb-4 text-white opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                 </svg>
+                                <p class="text-white font-semibold mb-1" id="backup-file-name">Yedek dosyasını seçmek için tıklayın</p>
+                                <p class="text-white opacity-60 text-sm">veya buraya sürükleyin (.zip)</p>
+                                <input type="file" id="backup_file" name="backup_file" accept=".zip" class="hidden" onchange="window.handleBackupFileSelect(this)">
                             </div>
-                            <h2 class="text-3xl font-bold text-white mb-4">Yönetici Hesabı</h2>
-                            <p class="text-white opacity-80">Sistem yöneticisi bilgilerini girin</p>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label class="block text-white text-sm font-semibold mb-3">Ad</label>
-                                <input type="text" id="admin_name" name="admin_name" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="Admin" required>
+
+                            <div id="backup-preview" class="hidden bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                                <h3 class="text-white font-semibold text-lg mb-4">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Yedek İçeriği
+                                </h3>
+                                <div id="backup-preview-content" class="text-white text-sm space-y-2 opacity-90"></div>
                             </div>
-                            <div>
-                                <label class="block text-white text-sm font-semibold mb-3">Soyad</label>
-                                <input type="text" id="admin_surname" name="admin_surname" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="Kullanıcı" required>
+
+                            <div class="bg-yellow-500 bg-opacity-20 border border-yellow-300 border-opacity-40 rounded-xl p-4 mb-2 text-white text-sm">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <strong>Bilgi:</strong> Yedek dosyasındaki tüm kullanıcı, ayar ve toplantı verisi yüklenecek. Yönetici hesabı ve sistem ayarları yedekten gelir — bu adımlar atlanır.
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <label class="block text-white text-sm font-semibold mb-3">E-posta Adresi</label>
-                            <input type="email" id="admin_email" name="admin_email" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="admin@firma.com" required>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label class="block text-white text-sm font-semibold mb-3">Şifre</label>
-                                <input type="password" id="admin_password" name="admin_password" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="••••••••" required>
-                            </div>
-                            <div>
-                                <label class="block text-white text-sm font-semibold mb-3">Şifre Tekrar</label>
-                                <input type="password" id="admin_password_confirm" name="admin_password_confirm" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" placeholder="••••••••" required>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div class="flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
                             <button type="button" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-xl font-semibold transition-all" onclick="window.prevStep()">
                                 ← Geri
                             </button>
@@ -669,8 +775,9 @@ if (file_exists('../database/zoom_meetings.db')) {
                         </div>
                     </div>
 
-                    <!-- Step 4: Sistem Ayarları -->
+                    <!-- Step 4: Sistem Ayarları (new) / Yedek Doğrulama (restore) -->
                     <div class="form-step" data-step="4">
+                        <div class="mode-new-only">
                         <div class="text-center mb-8">
                             <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-2xl">
                                 <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -681,7 +788,7 @@ if (file_exists('../database/zoom_meetings.db')) {
                             <h2 class="text-3xl font-bold text-white mb-4">Sistem Ayarları</h2>
                             <p class="text-white opacity-80">Temel sistem yapılandırmasını tamamlayın</p>
                         </div>
-                        
+
                         <div class="mb-6">
                             <label class="block text-white text-sm font-semibold mb-3">Site Başlığı</label>
                             <input type="text" id="site_title" name="site_title" value="Zoom Toplantı Yönetim Sistemi" class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none" required>
@@ -825,6 +932,35 @@ if (file_exists('../database/zoom_meetings.db')) {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        </div><!-- /mode-new-only -->
+
+                        <div class="mode-restore-only">
+                            <div class="text-center mb-8">
+                                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-3xl font-bold text-white mb-4">Yedeği Onayla</h2>
+                                <p class="text-white opacity-80">Yedek dosyasının içeriğini gözden geçirin</p>
+                            </div>
+
+                            <div id="restore-confirm-content" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                                <p class="text-white opacity-80 text-center">Yedek dosyası okunuyor...</p>
+                            </div>
+
+                            <div class="bg-red-500 bg-opacity-20 border border-red-300 border-opacity-40 rounded-xl p-4 mb-6 text-white text-sm">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <strong>Dikkat:</strong> Devam ettiğinizde veritabanı yedek içeriğiyle dolacaktır. Hedef veritabanında veri varsa silinecektir.
+                            </div>
+
+                            <label class="flex items-start cursor-pointer mb-2">
+                                <input type="checkbox" id="restore_confirm_checkbox" class="mt-1 mr-3 h-5 w-5 cursor-pointer">
+                                <span class="text-white text-sm">
+                                    Yedek dosyasının içeriğini gördüm. Yedekten geri yüklemeyi onaylıyorum.
+                                </span>
+                            </label>
                         </div>
 
                         <div class="flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
@@ -1413,10 +1549,10 @@ if (file_exists('../database/zoom_meetings.db')) {
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             window.updateDbName();
-            
+
             // Update database name every second
             setInterval(window.updateDbName, 1000);
-            
+
             // Close modals on escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
@@ -1424,7 +1560,195 @@ if (file_exists('../database/zoom_meetings.db')) {
                     window.hideCleanConfigModal();
                 }
             });
+
+            // İlk açılışta seçili mod kartını işaretle
+            const checkedRadio = document.querySelector('input[name="install_mode"]:checked');
+            if (checkedRadio) {
+                const card = checkedRadio.closest('.install-mode-card');
+                if (card) card.classList.add('selected');
+            }
         });
+
+        // ============================================================
+        // RESTORE-FROM-BACKUP modu
+        // ============================================================
+        window.installMode = 'new';
+
+        window.setInstallMode = function(mode) {
+            window.installMode = mode;
+            document.body.classList.remove('mode-new', 'mode-restore');
+            document.body.classList.add('mode-' + mode);
+
+            document.querySelectorAll('.install-mode-card').forEach(card => {
+                const input = card.querySelector('input[name="install_mode"]');
+                if (input && input.value === mode) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        };
+
+        window.handleBackupFileSelect = function(input) {
+            const fileNameEl = document.getElementById('backup-file-name');
+            const previewEl = document.getElementById('backup-preview');
+            const previewContent = document.getElementById('backup-preview-content');
+
+            if (!input.files || input.files.length === 0) {
+                if (fileNameEl) fileNameEl.textContent = 'Yedek dosyasını seçmek için tıklayın';
+                if (previewEl) previewEl.classList.add('hidden');
+                return;
+            }
+
+            const file = input.files[0];
+            if (!file.name.toLowerCase().endsWith('.zip')) {
+                alert('Sadece .zip uzantılı yedek dosyaları kabul edilir.');
+                input.value = '';
+                return;
+            }
+
+            if (fileNameEl) fileNameEl.textContent = file.name;
+            if (previewEl) previewEl.classList.remove('hidden');
+            const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+            if (previewContent) {
+                previewContent.innerHTML =
+                    '<div><strong>Dosya:</strong> ' + file.name + '</div>' +
+                    '<div><strong>Boyut:</strong> ' + sizeMB + ' MB</div>' +
+                    '<div class="opacity-70 text-xs mt-2">Manifest detayları sonraki adımda görüntülenecek.</div>';
+            }
+        };
+
+        window.loadBackupManifest = async function() {
+            const fileInput = document.getElementById('backup_file');
+            const target = document.getElementById('restore-confirm-content');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                if (target) target.innerHTML = '<p class="text-red-300 text-center">Önce bir yedek dosyası seçin.</p>';
+                return;
+            }
+
+            if (target) target.innerHTML = '<p class="text-white opacity-80 text-center">Yedek okunuyor...</p>';
+
+            const formData = new FormData();
+            formData.append('action', 'peek_backup');
+            formData.append('csrf_token', CSRF_TOKEN);
+            formData.append('backup_file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('process.php', { method: 'POST', body: formData });
+                const text = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Sunucudan geçersiz yanıt: ' + text.substring(0, 200));
+                }
+                if (!result.success) {
+                    target.innerHTML = '<div class="text-red-300 text-center">' + result.message + '</div>';
+                    return;
+                }
+                const m = result.data.manifest;
+                const rowsHtml = (m.tables || []).map(t => {
+                    const count = (m.row_counts && m.row_counts[t] !== undefined) ? m.row_counts[t] : 0;
+                    return '<div class="flex justify-between py-1 border-b border-white border-opacity-10"><span>' + t + '</span><span class="font-mono opacity-80">' + count + ' satır</span></div>';
+                }).join('');
+                target.innerHTML =
+                    '<div class="space-y-2 text-white text-sm">' +
+                    '<div class="flex justify-between"><span class="opacity-70">Yedek sürüm:</span> <span class="font-semibold">v' + (m.app_version || '?') + '</span></div>' +
+                    '<div class="flex justify-between"><span class="opacity-70">Kaynak DB:</span> <span class="uppercase">' + (m.db_type || '?') + '</span></div>' +
+                    '<div class="flex justify-between"><span class="opacity-70">Oluşturulma:</span> <span>' + (m.generated_at || '?') + '</span></div>' +
+                    '<div class="flex justify-between"><span class="opacity-70">Toplam tablo:</span> <span>' + ((m.tables || []).length) + '</span></div>' +
+                    '</div>' +
+                    '<div class="mt-4 pt-4 border-t border-white border-opacity-20"><div class="text-white font-semibold text-sm mb-2">Tablo İçerikleri:</div><div class="text-white text-xs max-h-60 overflow-y-auto">' + rowsHtml + '</div></div>';
+            } catch (e) {
+                if (target) target.innerHTML = '<div class="text-red-300 text-center">' + e.message + '</div>';
+            }
+        };
+
+        // nextStep'i mod-aware yap: restore + step 4'e girince manifest yükle, ayrıca step validation
+        const _orig_nextStep = window.nextStep;
+        window.nextStep = function() {
+            // Restore modunda step 3 → 4 geçişi için dosya zorunlu
+            if (window.installMode === 'restore') {
+                if (currentStep === 3) {
+                    const fi = document.getElementById('backup_file');
+                    if (!fi || !fi.files || fi.files.length === 0) {
+                        alert('Lütfen bir yedek dosyası seçin.');
+                        return;
+                    }
+                }
+                if (currentStep === 4) {
+                    const cb = document.getElementById('restore_confirm_checkbox');
+                    if (!cb || !cb.checked) {
+                        alert('Lütfen geri yükleme onay kutusunu işaretleyin.');
+                        return;
+                    }
+                }
+            }
+
+            // Orijinal next çağrısı
+            _orig_nextStep();
+
+            // Step 4'e geçtiyse + restore moduysa manifest yükle
+            if (window.installMode === 'restore' && currentStep === 4) {
+                setTimeout(() => window.loadBackupManifest(), 250);
+            }
+        };
+
+        // submitInstallationForm'u mod-aware yap
+        const _orig_submitInstallationForm = window.submitInstallationForm;
+        window.submitInstallationForm = function() {
+            if (window.installMode !== 'restore') {
+                return _orig_submitInstallationForm();
+            }
+
+            // RESTORE modu
+            const formData = new FormData();
+            formData.append('csrf_token', CSRF_TOKEN);
+            formData.append('action', 'install_from_backup');
+
+            // DB ayarları
+            const dbFields = ['db_type', 'db_host', 'db_port', 'db_name', 'db_username', 'db_password', 'auto_create_db'];
+            dbFields.forEach(fieldName => {
+                const field = document.getElementById(fieldName);
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        formData.append(fieldName, field.checked ? '1' : '0');
+                    } else {
+                        formData.append(fieldName, field.value);
+                    }
+                }
+            });
+
+            // Yedek dosyası
+            const fileInput = document.getElementById('backup_file');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                alert('Yedek dosyası kayıp. Geri dönüp tekrar seçin.');
+                window.location.reload();
+                return;
+            }
+            formData.append('backup_file', fileInput.files[0]);
+
+            fetch('process.php', { method: 'POST', body: formData })
+                .then(response => response.text())
+                .then(text => {
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('Geçersiz JSON yanıtı: ' + text.substring(0, 200));
+                    }
+                    if (data.success) {
+                        window.showInstallationResult(data);
+                    } else {
+                        alert('Geri Yükleme Hatası: ' + (data.message || 'Bilinmeyen hata'));
+                        console.error('Restore failed:', data);
+                    }
+                })
+                .catch(err => {
+                    console.error('Restore error:', err);
+                    alert('Geri yükleme sırasında hata: ' + err.message);
+                });
+        };
     </script>
 </body>
 </html>
