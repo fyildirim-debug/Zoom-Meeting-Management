@@ -25,7 +25,15 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?><?php echo APP_NAME; ?></title>
-    
+
+    <!-- App base path (tüm JS fetch'leri için absolute URL üretiminde kullanılır) -->
+    <script>
+        window.APP_BASE_PATH = <?php echo json_encode(defined('APP_BASE_PATH') ? APP_BASE_PATH : ''); ?>;
+        window.appUrl = function(path) {
+            return window.APP_BASE_PATH + '/' + String(path || '').replace(/^\/+/, '');
+        };
+    </script>
+
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     

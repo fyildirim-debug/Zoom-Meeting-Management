@@ -1,114 +1,128 @@
 <?php
 // Sidebar menü tanımları
+// NOT: Tüm URL'ler APP_BASE_PATH ile absolute (url() helper'ı).
+// Bu sayede sidebar admin/, kök ve modül sayfalarında aynı şekilde çalışır.
 
-// Admin sayfasında mıyız kontrol et
+// Geriye uyumluluk: bazı kodlar hala $adminPrefix/$userPrefix bekliyor olabilir
 $isAdminPage = strpos($_SERVER['PHP_SELF'], '/admin/') !== false;
 $adminPrefix = $isAdminPage ? '' : 'admin/';
 $userPrefix = $isAdminPage ? '../' : '';
 
-// Admin menü öğeleri
+// Admin menü öğeleri (absolute path)
 $adminMenuItems = [
     [
         'title' => 'Kullanıcı Yönetimi',
         'icon' => 'fas fa-users',
-        'url' => $adminPrefix . 'users.php',
+        'url' => url('admin/users.php'),
         'badge' => null
     ],
     [
         'title' => 'Birim Yönetimi',
         'icon' => 'fas fa-building',
-        'url' => $adminPrefix . 'departments.php',
+        'url' => url('admin/departments.php'),
         'badge' => null
     ],
     [
         'title' => 'Toplantı Onayları',
         'icon' => 'fas fa-check-circle',
-        'url' => $adminPrefix . 'meeting-approvals.php',
+        'url' => url('admin/meeting-approvals.php'),
         'badge' => getPendingMeetingsCount()
     ],
     [
         'title' => 'Zoom Hesapları',
         'icon' => 'fas fa-camera',
-        'url' => $adminPrefix . 'zoom-accounts.php',
+        'url' => url('admin/zoom-accounts.php'),
         'badge' => null
     ],
     [
         'title' => 'Zoom Toplantı İmport',
         'icon' => 'fas fa-cloud-download-alt',
-        'url' => $adminPrefix . 'import-zoom-meetings.php',
+        'url' => url('admin/import-zoom-meetings.php'),
         'badge' => null
     ],
     [
         'title' => 'Sistem Ayarları',
         'icon' => 'fas fa-cogs',
-        'url' => $adminPrefix . 'settings.php',
+        'url' => url('admin/settings.php'),
         'badge' => null
     ],
     [
         'title' => 'Raporlar ve İstatistikler',
         'icon' => 'fas fa-chart-bar',
-        'url' => $adminPrefix . 'reports.php',
+        'url' => url('admin/reports.php'),
         'badge' => null
     ],
     [
         'title' => 'Toplantı Kayıtları',
         'icon' => 'fas fa-video',
-        'url' => $adminPrefix . 'recordings.php',
+        'url' => url('admin/recordings.php'),
         'badge' => null
     ],
     [
         'title' => 'Sistem Kapatma',
         'icon' => 'fas fa-calendar-times',
-        'url' => $adminPrefix . 'system-closures.php',
+        'url' => url('admin/system-closures.php'),
         'badge' => null
     ],
     [
         'title' => 'Yedekleme',
         'icon' => 'fas fa-database',
-        'url' => $adminPrefix . 'backup.php',
+        'url' => url('admin/backup.php'),
+        'badge' => null
+    ],
+    [
+        'title' => 'Modüller',
+        'icon' => 'fas fa-puzzle-piece',
+        'url' => url('admin/modules.php'),
         'badge' => null
     ]
 ];
 
-// Kullanıcı menü öğeleri
+// Kullanıcı menü öğeleri (absolute path)
 $userMenuItems = [
     [
         'title' => 'Dashboard',
         'icon' => 'fas fa-tachometer-alt',
-        'url' => $userPrefix . 'dashboard.php',
+        'url' => url('dashboard.php'),
         'badge' => null
     ],
     [
         'title' => 'Toplantılarım',
         'icon' => 'fas fa-video',
-        'url' => $userPrefix . 'my-meetings.php',
+        'url' => url('my-meetings.php'),
         'badge' => null
     ],
     [
         'title' => 'Yeni Toplantı Talebi',
         'icon' => 'fas fa-plus-circle',
-        'url' => $userPrefix . 'new-meeting.php',
+        'url' => url('new-meeting.php'),
         'badge' => null
     ],
     [
         'title' => 'Takvim Görünümü',
         'icon' => 'fas fa-calendar-alt',
-        'url' => $userPrefix . 'calendar.php',
+        'url' => url('calendar.php'),
         'badge' => null
     ],
     [
         'title' => 'Kayıtlarım',
         'icon' => 'fas fa-film',
-        'url' => $userPrefix . 'my-recordings.php',
+        'url' => url('my-recordings.php'),
         'badge' => null
     ],
     [
         'title' => 'Profil Ayarları',
         'icon' => 'fas fa-user-cog',
-        'url' => $userPrefix . 'profile.php',
+        'url' => url('profile.php'),
         'badge' => null
     ]
 ];
+
+// Modül sistemi: aktif modüller sidebar'a kendi menü öğelerini ekleyebilir
+if (class_exists('HookEngine')) {
+    $adminMenuItems = HookEngine::applyFilters('sidebar.admin_menu', $adminMenuItems, $adminPrefix);
+    $userMenuItems  = HookEngine::applyFilters('sidebar.user_menu',  $userMenuItems,  $userPrefix);
+}
 
 // Bekleyen toplantı sayısını al
 function getPendingMeetingsCount() {
@@ -573,7 +587,7 @@ function isActiveMenu($url) {
     
     // Load user statistics
     function loadUserStats() {
-        fetch('<?php echo $userPrefix; ?>api/user-stats.php')
+        fetch(window.appUrl('api/user-stats.php'))
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.data) {
@@ -583,10 +597,10 @@ function isActiveMenu($url) {
             })
             .catch(error => console.error('Stats loading error:', error));
     }
-    
+
     // Quick action modals
     function openNewMeetingModal() {
-        window.location.href = '<?php echo $userPrefix; ?>new-meeting.php';
+        window.location.href = window.appUrl('new-meeting.php');
     }
     
     

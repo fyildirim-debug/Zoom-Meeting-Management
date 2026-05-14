@@ -392,41 +392,45 @@ function requireLogin() {
     }
 }
 
-// Rate limiting (basit)
+// Rate limiting (basit, dosya tabanlı). Dosyaya yazılamıyorsa rate-limit pas geçilir.
 function checkRateLimit($identifier, $maxAttempts = 5, $timeWindow = 300) {
-    $rateLimitFile = __DIR__ . '/../data/rate_limit.json';
-    
-    // Dosya yoksa oluştur
-    if (!file_exists($rateLimitFile)) {
-        file_put_contents($rateLimitFile, json_encode([]));
+    $dataDir = __DIR__ . '/../data';
+    if (!is_dir($dataDir)) {
+        @mkdir($dataDir, 0755, true);
     }
-    
-    $rateLimits = json_decode(file_get_contents($rateLimitFile), true) ?: [];
+    if (!is_writable($dataDir)) {
+        return true; // data klasörü yazılabilir değil — rate limit'i bypass et, akışı bozma
+    }
+
+    $rateLimitFile = $dataDir . '/rate_limit.json';
+    if (!file_exists($rateLimitFile)) {
+        @file_put_contents($rateLimitFile, json_encode([]));
+    }
+
+    $raw = @file_get_contents($rateLimitFile);
+    $rateLimits = $raw !== false ? (json_decode($raw, true) ?: []) : [];
     $now = time();
-    
-    // Eski kayıtları temizle
+
     foreach ($rateLimits as $key => $data) {
-        if ($data['time'] < ($now - $timeWindow)) {
+        if (($data['time'] ?? 0) < ($now - $timeWindow)) {
             unset($rateLimits[$key]);
         }
     }
-    
-    // Mevcut attempt sayısını kontrol et
+
     $attempts = 0;
     foreach ($rateLimits as $key => $data) {
         if (strpos($key, $identifier) === 0) {
             $attempts++;
         }
     }
-    
+
     if ($attempts >= $maxAttempts) {
         return false;
     }
-    
-    // Yeni attempt kaydı
+
     $rateLimits[$identifier . '_' . $now] = ['time' => $now];
-    file_put_contents($rateLimitFile, json_encode($rateLimits));
-    
+    @file_put_contents($rateLimitFile, json_encode($rateLimits));
+
     return true;
 }
 

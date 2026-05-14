@@ -3,6 +3,7 @@ $pageTitle = 'Toplantı Onayları';
 require_once '../config/config.php';
 require_once '../config/auth.php';
 require_once '../includes/ZoomAPI.php';
+require_once '../includes/MeetingService.php';
 
 requireLogin();
 if (!isAdmin()) {
@@ -287,160 +288,10 @@ function extractCustomZoomSettings($postData) {
 }
 
 function approveMeeting($meetingId, $zoomAccountId = null, $customSettings = []) {
-    global $pdo;
-    
-    try {
-        $pdo->beginTransaction();
-        
-        // Toplantı bilgilerini al
-        $stmt = $pdo->prepare("SELECT * FROM meetings WHERE id = ?");
-        $stmt->execute([$meetingId]);
-        $meeting = $stmt->fetch();
-        
-        if (!$meeting) {
-            throw new Exception('Toplantı bulunamadı.');
-        }
-        
-        if ($meeting['status'] !== 'pending') {
-            throw new Exception('Bu toplantı zaten işlenmiş.');
-        }
-        
-        // Zoom hesabı kontrolü ve API entegrasyonu
-        $finalZoomAccountId = null;
-        $meetingLink = null;
-        $zoomMeetingData = null;
-        
-        // Boş string'i null'a çevir
-        if ($zoomAccountId === '' || $zoomAccountId === '0') {
-            $zoomAccountId = null;
-        }
-        
-        if ($zoomAccountId) {
-            // Manuel seçim - çakışma kontrolü yap
-            if (isZoomAccountBusy($zoomAccountId, $meeting['date'], $meeting['start_time'], $meeting['end_time'])) {
-                throw new Exception('Seçilen Zoom hesabı bu saatte başka bir toplantıda kullanılıyor.');
-            }
-            
-            $stmt = $pdo->prepare("SELECT * FROM zoom_accounts WHERE id = ? AND status = 'active'");
-            $stmt->execute([$zoomAccountId]);
-            $zoomAccount = $stmt->fetch();
-            
-            if (!$zoomAccount) {
-                throw new Exception('Seçilen Zoom hesabı bulunamadı veya aktif değil.');
-            }
-            
-            // Zoom API entegrasyonu
-            try {
-                $zoomAccountManager = new ZoomAccountManager($pdo);
-                $zoomAPI = $zoomAccountManager->getZoomAPI($zoomAccountId);
-                
-                // Meeting verilerini hazırla
-                $meetingData = [
-                    'title' => $meeting['title'],
-                    'description' => $meeting['description'],
-                    'date' => $meeting['date'],
-                    'start_time' => $meeting['start_time'],
-                    'end_time' => $meeting['end_time'],
-                    'host_email' => $zoomAccount['email']
-                ];
-                
-                // Zoom'da toplantı oluştur - özel ayarlarla birlikte
-                $apiResult = $zoomAPI->createMeeting($meetingData, $customSettings);
-                
-                if ($apiResult['success']) {
-                    $zoomMeetingData = $apiResult['data'];
-                    $finalZoomAccountId = $zoomAccountId;
-                    $meetingLink = $zoomMeetingData['join_url'];
-                    
-                    // API log kaydet
-                    logZoomAPIActivity($pdo, $zoomAccountId, $meetingId, 'create_meeting', '/meetings',
-                                     $meetingData, $zoomMeetingData, 200, true);
-                    
-                    writeLog("Zoom meeting created successfully via API: Meeting ID {$zoomMeetingData['meeting_id']}", 'info');
-                } else {
-                    // API hatası - log kaydet
-                    logZoomAPIActivity($pdo, $zoomAccountId, $meetingId, 'create_meeting', '/meetings',
-                                     $meetingData, null, null, false, $apiResult['message']);
-                    
-                    throw new Exception('Zoom API hatası: ' . $apiResult['message']);
-                }
-                
-            } catch (Exception $apiException) {
-                writeLog("Zoom API integration error: " . $apiException->getMessage(), 'error');
-                
-                // API hatası durumunda fallback - basit link oluştur
-                $finalZoomAccountId = $zoomAccountId;
-                $meetingLink = generateFallbackMeetingLink($zoomAccount, $meeting);
-                $zoomMeetingData = null;
-                
-                writeLog("Falling back to simple meeting link generation", 'warning');
-            }
-        } else {
-            throw new Exception('Zoom hesabı seçimi zorunludur.');
-        }
-        
-        // Toplantıyı onayla ve Zoom verilerini kaydet
-        if ($zoomMeetingData) {
-            // Gerçek API verilerini kaydet
-            $stmt = $pdo->prepare("
-                UPDATE meetings
-                SET status = 'approved',
-                    zoom_account_id = ?,
-                    meeting_link = ?,
-                    zoom_meeting_id = ?,
-                    zoom_uuid = ?,
-                    zoom_join_url = ?,
-                    zoom_start_url = ?,
-                    zoom_password = ?,
-                    zoom_host_id = ?,
-                    api_created_at = NOW(),
-                    approved_at = NOW(),
-                    approved_by = ?
-                WHERE id = ?
-            ");
-            $result = $stmt->execute([
-                $finalZoomAccountId,
-                $meetingLink,
-                $zoomMeetingData['meeting_id'],
-                $zoomMeetingData['uuid'],
-                $zoomMeetingData['join_url'],
-                $zoomMeetingData['start_url'],
-                $zoomMeetingData['password'],
-                $zoomMeetingData['host_id'],
-                $_SESSION['user_id'],
-                $meetingId
-            ]);
-        } else {
-            // Fallback verilerini kaydet
-            $stmt = $pdo->prepare("
-                UPDATE meetings
-                SET status = 'approved',
-                    zoom_account_id = ?,
-                    meeting_link = ?,
-                    approved_at = NOW(),
-                    approved_by = ?
-                WHERE id = ?
-            ");
-            $result = $stmt->execute([$finalZoomAccountId, $meetingLink, $_SESSION['user_id'], $meetingId]);
-        }
-        
-        if ($result) {
-            $pdo->commit();
-            writeLog("Meeting approved: ID $meetingId, Zoom Account: $finalZoomAccountId", 'info');
-            
-            // Aktivite kaydet
-            logActivity('approved', 'meeting', $meetingId,
-                'Toplantı onaylandı: ' . $meeting['title'] . ' (' . $meeting['date'] . ')',
-                $_SESSION['user_id']);
-            
-            return ['success' => true, 'message' => 'Toplantı başarıyla onaylandı ve Zoom toplantısı oluşturuldu.'];
-        }
-        
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        writeLog("Approve meeting error: " . $e->getMessage(), 'error');
-        return ['success' => false, 'message' => $e->getMessage()];
-    }
+    // Tüm onay mantığı MeetingService::approve içinde — admin paneli ve modüller
+    // (örn. SMS) için tek doğruluk kaynağı. Hook'lar burada tetiklenir.
+    $approverId = (int)($_SESSION['user_id'] ?? 0);
+    return MeetingService::approve((int)$meetingId, $zoomAccountId, $customSettings ?: [], $approverId);
 }
 
 function rejectMeeting($meetingId, $reason = '') {

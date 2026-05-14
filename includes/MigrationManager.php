@@ -71,7 +71,8 @@ class MigrationManager {
             '001_add_zoom_fields',
             '002_add_recording_fields',
             '003_add_meeting_indexes',
-            '004_add_system_closures'
+            '004_add_system_closures',
+            '005_add_modules_table'
         ];
         
         // Dosya bazlı migration'lar (varsa)
@@ -411,7 +412,70 @@ class MigrationManager {
                 'success' => true,
                 'message' => 'system_closures tablosu zaten mevcut'
             ];
-            
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Migration 005: Modüller tablosu (eklenti sistemi)
+     * Modül kaydı: id, name, version, status (installed/active/inactive), config JSON
+     */
+    private function migrate_005_add_modules_table() {
+        try {
+            $tableExists = false;
+            try {
+                $this->pdo->query("SELECT 1 FROM modules LIMIT 1");
+                $tableExists = true;
+            } catch (Exception $e) {
+                $tableExists = false;
+            }
+
+            if (!$tableExists) {
+                if ($this->dbType === 'mysql') {
+                    $sql = "CREATE TABLE modules (
+                        id VARCHAR(64) PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL,
+                        version VARCHAR(32) NOT NULL,
+                        description TEXT NULL,
+                        author VARCHAR(255) NULL,
+                        status ENUM('installed','active','inactive') NOT NULL DEFAULT 'installed',
+                        config TEXT NULL,
+                        installed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        activated_at DATETIME NULL,
+                        INDEX idx_status (status)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                } else {
+                    $sql = "CREATE TABLE modules (
+                        id VARCHAR(64) PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL,
+                        version VARCHAR(32) NOT NULL,
+                        description TEXT NULL,
+                        author VARCHAR(255) NULL,
+                        status VARCHAR(16) NOT NULL DEFAULT 'installed' CHECK (status IN ('installed','active','inactive')),
+                        config TEXT NULL,
+                        installed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        activated_at DATETIME NULL
+                    )";
+                }
+
+                $this->pdo->exec($sql);
+
+                return [
+                    'success' => true,
+                    'message' => 'modules tablosu oluşturuldu'
+                ];
+            }
+
+            return [
+                'success' => true,
+                'message' => 'modules tablosu zaten mevcut'
+            ];
+
         } catch (Exception $e) {
             return [
                 'success' => false,

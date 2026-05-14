@@ -255,19 +255,8 @@
         }
 
         function performGlobalSearch(query) {
-            // Admin sayfalarından tam URL kullan
-            const baseUrl = window.location.protocol + '//' + window.location.host;
-            const currentPath = window.location.pathname;
-            let apiPath;
-            
-            if (currentPath.includes('/admin/')) {
-                // Admin sayfasından ana dizine git
-                const pathParts = currentPath.split('/');
-                const basePath = pathParts.slice(0, -2).join('/'); // admin/ dan önceki kısım
-                apiPath = baseUrl + basePath + '/api/';
-            } else {
-                apiPath = 'api/';
-            }
+            // Absolute API path — sayfa konumundan bağımsız
+            const apiPath = window.appUrl('api/');
             
             fetch(`${apiPath}search-meetings.php?q=${encodeURIComponent(query)}`)
             .then(data => {
@@ -795,19 +784,8 @@
         }
 
         function performSearch(query) {
-            // Admin sayfalarından tam URL kullan
-            const baseUrl = window.location.protocol + '//' + window.location.host;
-            const currentPath = window.location.pathname;
-            let apiPath;
-            
-            if (currentPath.includes('/admin/')) {
-                // Admin sayfasından ana dizine git
-                const pathParts = currentPath.split('/');
-                const basePath = pathParts.slice(0, -2).join('/'); // admin/ dan önceki kısım
-                apiPath = baseUrl + basePath + '/api/';
-            } else {
-                apiPath = 'api/';
-            }
+            // Absolute API path — sayfa konumundan bağımsız
+            const apiPath = window.appUrl('api/');
             
             fetch(`${apiPath}search-meetings.php?q=${encodeURIComponent(query)}`)
                 .then(response => response.json())
@@ -938,19 +916,8 @@
 
         // Mobile search functions
         function performMobileSearch(query) {
-            // Admin sayfalarından tam URL kullan
-            const baseUrl = window.location.protocol + '//' + window.location.host;
-            const currentPath = window.location.pathname;
-            let apiPath;
-            
-            if (currentPath.includes('/admin/')) {
-                // Admin sayfasından ana dizine git
-                const pathParts = currentPath.split('/');
-                const basePath = pathParts.slice(0, -2).join('/'); // admin/ dan önceki kısım
-                apiPath = baseUrl + basePath + '/api/';
-            } else {
-                apiPath = 'api/';
-            }
+            // Absolute API path — sayfa konumundan bağımsız
+            const apiPath = window.appUrl('api/');
             
             fetch(`${apiPath}search-meetings.php?q=${encodeURIComponent(query)}`)
                 .then(response => response.json())

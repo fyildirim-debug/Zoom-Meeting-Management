@@ -117,10 +117,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $meetingId = $pdo->lastInsertId();
                                 $createdCount++;
                                 writeLog("New meeting request created: ID $meetingId by user " . $currentUser['id'], 'info');
-                                
+
                                 logActivity('create_meeting', 'meeting', $meetingId,
                                     'Yeni toplantı talebi: ' . $title . ' (' . $meetingDate . ' ' . $startTime . ')',
                                     $currentUser['id']);
+
+                                // Modül hook: SMS gibi modüller bu olaya bağlanır
+                                if (class_exists('HookEngine')) {
+                                    $meetingRow = [
+                                        'id' => $meetingId,
+                                        'title' => $title,
+                                        'date' => $meetingDate,
+                                        'start_time' => $startTime,
+                                        'end_time' => $endTime,
+                                        'moderator' => $moderator,
+                                        'description' => $description,
+                                        'participants_count' => $participantsCount,
+                                        'user_id' => $currentUser['id'],
+                                        'department_id' => $currentUser['department_id'],
+                                        'status' => 'pending',
+                                    ];
+                                    HookEngine::doAction('meeting.after_create', $meetingId, $meetingRow);
+                                }
                             }
                         }
                         

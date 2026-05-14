@@ -1,0 +1,14 @@
+{
+    "id": "sms",
+    "name": "SMS Bildirimleri",
+    "version": "1.0.1",
+    "description": "Yeni toplantı talebi geldiğinde yöneticiye SMS gönderir. Yönetici, oturum açmadan SMS'teki tek kullanımlık linkle çakışmasız bir Zoom hesabı seçip toplantıyı onaylayabilir. Sağlayıcı endpoint'i ve API anahtarı admin panelinden yapılandırılır.",
+    "author": "Zoom Meeting Management",
+    "requires": {
+        "app": ">=1.2.0"
+    },
+    "settings_url": "pages/settings.php",
+    "hooks": [
+        "meeting.after_create"
+    ]
+}

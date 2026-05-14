@@ -36,6 +36,7 @@ class BackupManager
         'migrations',
         'zoom_api_logs',
         'system_closures',
+        'modules',
     ];
 
     public function __construct(PDO $pdo, ?string $dbType = null)

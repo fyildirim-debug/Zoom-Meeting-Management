@@ -291,7 +291,7 @@ include '../includes/sidebar.php';
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div class="max-w-xs truncate">
-                                        <?php echo htmlspecialchars($dept['description']); ?>
+                                        <?php echo htmlspecialchars($dept['description'] ?? ''); ?>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -322,10 +322,10 @@ include '../includes/sidebar.php';
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    <?php if ($dept['manager_name']): ?>
+                                    <?php if (!empty($dept['manager_name'])): ?>
                                         <div>
                                             <div class="font-medium"><?php echo htmlspecialchars($dept['manager_name']); ?></div>
-                                            <div class="text-gray-500"><?php echo htmlspecialchars($dept['manager_email']); ?></div>
+                                            <div class="text-gray-500"><?php echo htmlspecialchars($dept['manager_email'] ?? ''); ?></div>
                                         </div>
                                     <?php else: ?>
                                         <span class="text-gray-400">-</span>

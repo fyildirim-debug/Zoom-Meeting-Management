@@ -164,17 +164,21 @@ function getUserIP() {
 // Log yazma
 function writeLog($message, $type = 'info', $file = 'app.log') {
     $logDir = __DIR__ . '/../logs';
-    if (!file_exists($logDir)) {
-        mkdir($logDir, 0755, true);
+    if (!is_dir($logDir)) {
+        @mkdir($logDir, 0755, true);
     }
-    
+    // Yazılamıyorsa sessizce çık (uygulama akışı bozulmasın)
+    if (!is_writable($logDir)) {
+        return;
+    }
+
     $logFile = $logDir . '/' . $file;
     $timestamp = date('Y-m-d H:i:s');
-    $ip = getUserIP();
+    $ip = function_exists('getUserIP') ? getUserIP() : ($_SERVER['REMOTE_ADDR'] ?? '?');
     $user = $_SESSION['user_id'] ?? 'Guest';
-    
+
     $logEntry = "[$timestamp] [$type] [User:$user] [IP:$ip] $message" . PHP_EOL;
-    file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+    @file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 }
 
 // Rastgele string oluşturma
@@ -781,4 +785,50 @@ function checkMeetingDateAllowed($date) {
         'message' => '',
         'closure' => null
     ];
+}
+
+// ─────────────────────────────────────────────────────────
+//  APP_BASE_PATH — proje root'unun web URL prefix'i
+//  Örn: http://host/zoom/...  → '/zoom'
+//       http://host/...        → ''
+//  Tüm sidebar/link üretimleri buna göre absolute path kullanır.
+// ─────────────────────────────────────────────────────────
+if (!defined('APP_BASE_PATH')) {
+    $appBasePath = '';
+    try {
+        $docRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+        $projectRoot = realpath(__DIR__ . '/..');
+        if ($docRoot && $projectRoot && strpos($projectRoot, $docRoot) === 0) {
+            $appBasePath = str_replace('\\', '/', substr($projectRoot, strlen($docRoot)));
+            $appBasePath = rtrim($appBasePath, '/');
+        }
+    } catch (Exception $e) {
+        $appBasePath = '';
+    }
+    define('APP_BASE_PATH', $appBasePath);
+}
+
+/**
+ * Proje root'tan absolute URL üret.
+ * url('admin/users.php')  →  '/zoom/admin/users.php'
+ */
+if (!function_exists('url')) {
+    function url(string $path = ''): string
+    {
+        $path = ltrim($path, '/');
+        return APP_BASE_PATH . '/' . $path;
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+//  Modül sistemi bootstrap (varsa)
+//  modules/_core/bootstrap.php aktif modülleri yükler.
+//  Kurulum sırasında veya çekirdek yoksa sessizce atlanır.
+// ─────────────────────────────────────────────────────────
+if (
+    isset($GLOBALS['pdo']) &&
+    $GLOBALS['pdo'] instanceof PDO &&
+    is_file(__DIR__ . '/../modules/_core/bootstrap.php')
+) {
+    require_once __DIR__ . '/../modules/_core/bootstrap.php';
 }

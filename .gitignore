@@ -77,10 +77,12 @@ composer.lock
 *~
 
 # ─────────────────────────────────────────────────────────
-#  GELİŞTİRME ZIP'LERİ (manuel bundle'lar)
+#  GELİŞTİRME ZIP'LERİ (manuel bundle'lar, release artifact'leri)
 # ─────────────────────────────────────────────────────────
 zmm-backup-feature-*.zip
 backup-changes-*.zip
+sms-module-*.zip
+*-module-v*.zip
 
 # ─────────────────────────────────────────────────────────
 #  CLAUDE / SERENA META (proje dışı araç)

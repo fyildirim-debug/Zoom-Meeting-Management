@@ -206,16 +206,17 @@ class ZoomAPI {
                 writeLog("Custom Zoom settings applied: " . json_encode($customSettings), 'info');
             }
             
-            // 🔧 HOST İSMİ OTOMATİK BELİRLEME SİSTEMİ - Mevcut kullanıcının adını al
-            $currentUser = getCurrentUser();
+            // Host ismi: oturum açık kullanıcı varsa onun adı, yoksa moderator/fallback
+            // (SMS approve.php gibi login'siz akışlardan da çağrılabildiği için defensive)
+            $currentUser = function_exists('getCurrentUser') ? getCurrentUser() : null;
             $hostDisplayName = '';
-            
+
             if ($currentUser && !empty($currentUser['name']) && !empty($currentUser['surname'])) {
                 $hostDisplayName = trim($currentUser['name'] . ' ' . $currentUser['surname']);
-                writeLog("🎯 HOST DISPLAY NAME: Otomatik belirlendi - '$hostDisplayName' (User ID: " . $currentUser['id'] . ")", 'info');
+                writeLog("HOST DISPLAY NAME: oturumdan alındı - '$hostDisplayName' (User ID: " . $currentUser['id'] . ")", 'info');
             } else {
                 $hostDisplayName = $meetingData['moderator'] ?? 'Toplantı Moderatörü';
-                writeLog("⚠️ HOST DISPLAY NAME: getCurrentUser() başarısız, fallback kullanıldı - '$hostDisplayName'", 'warning');
+                writeLog("HOST DISPLAY NAME: fallback (moderator) - '$hostDisplayName'", 'info');
             }
             
             // Zoom API için meeting parametrelerini hazırla
@@ -249,7 +250,7 @@ class ZoomAPI {
                     'enable_dedicated_dial_in' => false,
                     'enable_dial_in_ip_lock' => false,
                     'contact_name' => $hostDisplayName, // 🎯 Host adını contact_name'e set et
-                    'contact_email' => $currentUser['email'] ?? $meetingData['moderator_email'] ?? '',
+                    'contact_email' => ($currentUser['email'] ?? null) ?: ($meetingData['moderator_email'] ?? ''),
                     'registrants_confirmation_email' => true,
                     'registrants_email_notification' => true,
                     'meeting_invitees' => [],
