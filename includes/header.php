@@ -13,7 +13,7 @@ $currentUser = getCurrentUser();
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 ?>
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="<?php echo function_exists('current_locale') ? htmlspecialchars(current_locale()) : 'tr'; ?>">
 <head>
     <script>
         // Sayfa yüklenirken temanın hemen uygulanması için (yanıp sönme önlenir)
@@ -1102,11 +1102,43 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             <!-- Header Actions -->
             <div class="flex items-center space-x-4">
                 <!-- Theme Toggle -->
-                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="<?php echo htmlspecialchars(t('common.language')); ?>">
                     <i class="fas fa-sun icon-sun"></i>
                     <i class="fas fa-moon icon-moon"></i>
                 </button>
-                
+
+                <!-- Language Switcher -->
+                <div class="relative dropdown">
+                    <button
+                        class="flex items-center space-x-1 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        onclick="toggleDropdown('lang')"
+                        title="<?php echo htmlspecialchars(t('common.language')); ?>"
+                    >
+                        <i class="fas fa-globe text-gray-600"></i>
+                        <span class="text-sm font-semibold text-gray-700 uppercase"><?php echo htmlspecialchars(current_locale()); ?></span>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                    </button>
+                    <div class="dropdown-content" id="lang-dropdown" style="min-width: 160px;">
+                        <?php
+                        // Mevcut URL'yi koru, lang parametresini ekle/değiştir
+                        $qs = $_GET;
+                        foreach (I18n::supported() as $loc):
+                            $qs['lang'] = $loc;
+                            $href = '?' . http_build_query($qs);
+                            $isActive = ($loc === current_locale());
+                        ?>
+                            <a href="<?php echo htmlspecialchars($href); ?>"
+                               class="flex items-center px-4 py-2 text-sm hover:bg-gray-50 <?php echo $isActive ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-700'; ?>">
+                                <span class="uppercase text-xs font-mono w-8"><?php echo htmlspecialchars($loc); ?></span>
+                                <span class="ml-2"><?php echo htmlspecialchars(I18n::nativeName($loc)); ?></span>
+                                <?php if ($isActive): ?>
+                                    <i class="fas fa-check ml-auto text-indigo-600"></i>
+                                <?php endif; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 <!-- User Dropdown -->
                 <div class="relative dropdown">
                     <button
@@ -1120,10 +1152,10 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                         </div>
                         <div class="hidden sm:block text-left">
                             <p class="text-sm font-medium text-gray-800">
-                                <?php echo $currentUser['name'] . ' ' . $currentUser['surname']; ?>
+                                <?php echo htmlspecialchars($currentUser['name'] . ' ' . $currentUser['surname']); ?>
                             </p>
                             <p class="text-xs text-gray-500">
-                                <?php echo $currentUser['role'] === 'admin' ? 'Yönetici' : 'Kullanıcı'; ?>
+                                <?php echo $currentUser['role'] === 'admin' ? t('roles.admin') : t('roles.user'); ?>
                             </p>
                         </div>
                         <i class="fas fa-chevron-down text-gray-400"></i>
@@ -1137,21 +1169,21 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             <p class="text-sm text-gray-500"><?php echo $currentUser['email']; ?></p>
                         </div>
                         
-                        <a href="<?php echo (strpos($_SERVER['PHP_SELF'], '/admin/') !== false) ? '../profile.php' : 'profile.php'; ?>" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                        <a href="<?php echo url('profile.php'); ?>" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-user mr-3 text-gray-400"></i>
-                            Profil Ayarları
+                            <?php echo htmlspecialchars(t('sidebar.profile')); ?>
                         </a>
-                        
-                        <a href="<?php echo (strpos($_SERVER['PHP_SELF'], '/admin/') !== false) ? '../admin/settings.php' : 'admin/settings.php'; ?>" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+
+                        <a href="<?php echo url('admin/settings.php'); ?>" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-cog mr-3 text-gray-400"></i>
-                            Sistem Ayarları
+                            <?php echo htmlspecialchars(t('sidebar.settings')); ?>
                         </a>
-                        
+
                         <div class="border-t border-gray-200"></div>
-                        
-                        <a href="<?php echo (strpos($_SERVER['PHP_SELF'], '/admin/') !== false) ? '../logout.php' : 'logout.php'; ?>" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50">
+
+                        <a href="<?php echo url('logout.php'); ?>" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50">
                             <i class="fas fa-sign-out-alt mr-3"></i>
-                            Çıkış Yap
+                            <?php echo htmlspecialchars(t('common.logout')); ?>
                         </a>
                     </div>
                 </div>

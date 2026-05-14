@@ -788,6 +788,21 @@ function checkMeetingDateAllowed($date) {
 }
 
 // ─────────────────────────────────────────────────────────
+//  i18n — çoklu dil desteği (JSON tabanlı, lang/<locale>.json)
+// ─────────────────────────────────────────────────────────
+if (!class_exists('I18n', false)) {
+    require_once __DIR__ . '/i18n.php';
+}
+// session başlamış olabilir veya olmayabilir; I18n::init session'a yazar
+if (session_status() !== PHP_SESSION_NONE) {
+    I18n::init();
+} else {
+    // Session henüz yok — sadece cookie/Accept-Language ile başlat;
+    // session açıldığında işlem otomatik tutarlı kalır (idempotent init)
+    I18n::init();
+}
+
+// ─────────────────────────────────────────────────────────
 //  APP_BASE_PATH — proje root'unun web URL prefix'i
 //  Örn: http://host/zoom/...  → '/zoom'
 //       http://host/...        → ''

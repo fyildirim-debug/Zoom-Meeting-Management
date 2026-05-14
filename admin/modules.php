@@ -69,8 +69,8 @@ include '../includes/sidebar.php';
                     <i class="fas fa-puzzle-piece text-white text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Modüller</h1>
-                    <p class="text-gray-600">Sistem eklentilerini aç/kapa ile yönetin. Yeni modüller <code>modules/&lt;id&gt;/</code> klasörüne yerleştirildiğinde burada görünür.</p>
+                    <h1 class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars(t('modules.title')); ?></h1>
+                    <p class="text-gray-600"><?php echo htmlspecialchars(t('modules.subtitle')); ?></p>
                 </div>
             </div>
         </div>
@@ -106,7 +106,7 @@ include '../includes/sidebar.php';
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900 flex items-center">
                     <i class="fas fa-list mr-2 text-gray-600"></i>
-                    Mevcut Modüller
+                    <?php echo htmlspecialchars(t('modules.available')); ?>
                     <span class="ml-2 text-sm text-gray-500 font-normal">(<?php echo count($modules); ?>)</span>
                 </h2>
             </div>
@@ -114,11 +114,7 @@ include '../includes/sidebar.php';
             <?php if (empty($modules)): ?>
                 <div class="p-8 text-center text-gray-500">
                     <i class="fas fa-puzzle-piece text-4xl mb-3 opacity-30"></i>
-                    <p>
-                        Henüz modül yok. Yeni modülleri sunucuda
-                        <code class="bg-gray-100 px-2 py-1 rounded">modules/&lt;modul-id&gt;/</code>
-                        klasörü olarak yerleştirin; burada otomatik görünecektir.
-                    </p>
+                    <p><?php echo htmlspecialchars(t('modules.no_modules')); ?></p>
                 </div>
             <?php else: ?>
                 <div class="divide-y divide-gray-200">
@@ -141,10 +137,10 @@ include '../includes/sidebar.php';
                                             'not_installed'=> 'bg-blue-100 text-blue-700',
                                         ];
                                         $statusLabels = [
-                                            'active'        => 'Aktif',
-                                            'inactive'      => 'Pasif',
-                                            'installed'     => 'Kurulu (pasif)',
-                                            'not_installed' => 'Aktifleştirilmemiş',
+                                            'active'        => t('modules.status_active'),
+                                            'inactive'      => t('modules.status_inactive'),
+                                            'installed'     => t('modules.status_installed'),
+                                            'not_installed' => t('modules.status_not_installed'),
                                         ];
                                         $color = $statusColors[$mod['status']] ?? 'bg-gray-100 text-gray-600';
                                         $label = $statusLabels[$mod['status']] ?? $mod['status'];
@@ -175,7 +171,7 @@ include '../includes/sidebar.php';
                                         $settingsHref = url('modules/' . $mod['id'] . '/' . ltrim($settingsUrl, '/'));
                                     ?>
                                         <a href="<?php echo htmlspecialchars($settingsHref); ?>" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg">
-                                            <i class="fas fa-cog mr-1"></i> Ayarlar
+                                            <i class="fas fa-cog mr-1"></i> <?php echo htmlspecialchars(t('modules.settings')); ?>
                                         </a>
                                     <?php endif; ?>
 
@@ -185,7 +181,7 @@ include '../includes/sidebar.php';
                                             <input type="hidden" name="action" value="deactivate">
                                             <input type="hidden" name="module_id" value="<?php echo htmlspecialchars($mod['id']); ?>">
                                             <button type="submit" class="bg-gray-500 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded-lg">
-                                                <i class="fas fa-pause mr-1"></i> Pasifleştir
+                                                <i class="fas fa-pause mr-1"></i> <?php echo htmlspecialchars(t('modules.deactivate')); ?>
                                             </button>
                                         </form>
                                     <?php else: /* not_installed, installed veya inactive — hepsi tek butonla aktif olur */ ?>
@@ -194,7 +190,7 @@ include '../includes/sidebar.php';
                                             <input type="hidden" name="action" value="activate">
                                             <input type="hidden" name="module_id" value="<?php echo htmlspecialchars($mod['id']); ?>">
                                             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded-lg">
-                                                <i class="fas fa-play mr-1"></i> Aktifleştir
+                                                <i class="fas fa-play mr-1"></i> <?php echo htmlspecialchars(t('modules.activate')); ?>
                                             </button>
                                         </form>
                                     <?php endif; ?>
